@@ -1,8 +1,8 @@
 /*
   Using the CY8CMBR3 Sensor.
 
-  This example shows how to setup the CY8CMBR3 sensor with default settings and
-  use it for basic capacitance readings from a moisture sensor.
+  This example shows how to setup the CY8CMBR3 sensor and change 
+  its I2C address.
 
   SparkFun Electronics
   Date: 2025/12
@@ -21,18 +21,32 @@
 #include <SparkFun_CY8CMBR3.h>
 
 SfeCY8CMBR3ArdI2C mySensor;
+uint8_t address = kCY8CMBR3DefaultAddr; // Change this to your new address if you have modified it
+uint8_t newAddress = 0x50; // Example new address to set (addresses from 0x08 to 0x77 are valid)
 
 void setup()
 {
     // Start serial
     Serial.begin(115200);
-    Serial.println("CY8CMBR3 Example 1 - Basic Readings");
+    Serial.println("CY8CMBR3 Example 4 - I2C Address"); 
     
     // Start the underlying Arduino I2C bus
     Wire.begin();
 
-    // Initialize CY8CMBR3 sensor
-    mySensor.begin();
+    // Initialize CY8CMBR3 sensor, note how we pass in the old address
+    mySensor.begin(address);
+
+    // Change the I2C address
+    if (mySensor.setI2CAddress(newAddress))
+    {
+        Serial.print("I2C address changed successfully to 0x");
+        Serial.println(newAddress, HEX);
+    }
+    else
+    {
+        Serial.println("Failed to change I2C address.");
+        Serial.println("Make sure the old address is correct and the new address is valid (0x08 to 0x77).");
+    }
 
     // Initialize as a moisture sensor (with default settings)
     if (!mySensor.defaultMoistureSensorInit())
@@ -46,7 +60,6 @@ void setup()
 void loop()
 {   
     // Read capacitance in pF
-    // TODO: assess whether this value, or base + diff counts is more useful (balance of range vs resolution)
     uint8_t capacitance = mySensor.readCapacitancePF();
     
     // Wet soil has a higher dialectric constant as it can hold more charge

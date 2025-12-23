@@ -23,93 +23,11 @@
  * @section License License
  * SPDX-License-Identifier: MIT
  *
- * @see https://github.com/sparkfun/SparkFun_AS7343_Arduino_Library
+ * @see https://github.com/sparkfun/SparkFun_CY8CMBR3_Arduino_Library
  */
 #include "sfDevCY8CMBR3.h"
 
 // consts
-
-/*
-class sfDevCY8CMBR3
-{
-  public:
-    sfDevCY8CMBR3() : _last_data_pF{0}, _theBus{nullptr}
-    {
-    }
-
-    /// @brief This method is called to initialize the CY8CMBR3 device through the
-    /// specified bus.
-    /// @param theBus Pointer to the bus object.
-    /// @return True if successful, false if it fails.
-    bool begin(sfTkIBus *theBus = nullptr);
-
-    /// @brief Requests the family ID from the sensor.
-    /// @return The family ID of the sensor.
-    uint8_t getFamilyID(void);
-
-    /// @brief Requests the device ID from the sensor.
-    /// @return The device ID of the sensor.
-    uint8_t getDeviceID(void);
-
-    /// @brief Sets the communication bus to the specified bus.
-    /// @param theBus Bus to set as the communication device.
-    void setCommunicationBus(sfTkIBus *theBus);
-
-    /// @brief Set the sensor Id 
-    /// @param sensorId The sensor Id to set.
-    /// @details This will set the sensor Id (and by extension the debug sensor Id) for debug operations.
-    /// @return True if successful, false if it fails.
-    bool setSensorId(sfe_cy8cmbr3_sensor_id_t sensorId = SID_0);
-
-    /// @brief Set sensitivity for the specified sensor Id
-    /// @details This method sets the sensitivity for the specified sensor by writing to the SENSITIVITY0 register.
-    /// @param sensorId The sensor Id to set the sensitivity for.
-    /// @param sensitivity The sensitivity value to set (0-3).
-    /// @return True if successful, false if it fails.
-    bool setSensitivity(sfe_cy8cmbr3_sensor_id_t sensorId = SID_0, sfe_cy8cmbr3_sensitivity_t sensitivity);
-
-    /// @brief Enable or disable sensor by sensor Id
-    /// @details This method enables the specified sensor by setting the appropriate bits in the SENSOR_EN register.
-    /// @param sensorId The sensor Id to enable or disable.
-    /// @param enable True to enable the sensor, false to disable.
-    /// @return True if successful, false if it fails.
-    bool enable(sfe_cy8cmbr3_sensor_id_t sensorId = SID_0, bool enable = true);
-
-    /// @brief Reads the capacitance value in pF from the sensor.
-    /// @details This method reads the capacitance in pF from the DEBUG_CP register.
-    /// @param sensorId The sensor Id to read the capacitance from.
-    /// @return The capacitance value in pF.
-    uint8_t readCapacitancePF(sfe_cy8cmbr3_sensor_id_t sensorId = SID_0);
-
-    /// @brief Reads the difference count value from the sensor.
-    /// @details This method reads the difference count from the DEBUG_DIFFERENCE_COUNTx register.
-    /// @param sensorId The sensor Id to read the difference count from.
-    uint16_t readDifferenceCount(sfe_cy8cmbr3_sensor_id_t sensorId = SID_0);
-
-    /// @brief Reads the baseline count value from the sensor.
-    /// @details This method reads the baseline count from the DEBUG_BASELINE_COUNT resister.
-    /// @param sensorId The sensor Id to read the baseline count from.
-    uint16_t readBaselineCount(sfe_cy8cmbr3_sensor_id_t sensorId = SID_0);
-
-    /// @brief Turn on or off the LED.
-    /// @details This method turns on or off the LED by setting or clearing the
-    /// LED_ACT bit in the LED register (ksfAS7343RegLed).
-    /// @param ledOn True to turn on the LED, false to turn off.
-    /// @return True if successful, false if it fails.
-    bool ledOn(bool ledOn = true);
-
-    /// @brief Turn off the LED.
-    /// @details This method turns off the LED by calling the ledOn method
-    /// with false.
-    /// @return True if successful, false if it fails.
-    bool ledOff(void);
-
-  private:
-    sfe_cy8cmbr3_reg_diff_cnt_t _last_data_pF; // Last read data from the sensor.
-
-    sfTkIBus *_theBus; // Pointer to bus device.
-};
-*/
 
 bool sfDevCY8CMBR3::begin(sfTkIBus *theBus)
 {
@@ -161,7 +79,7 @@ void sfDevCY8CMBR3::setCommunicationBus(sfTkIBus *theBus)
 
 bool sfDevCY8CMBR3::_setI2CAddress(uint8_t i2cAddress){
     // Ensure valid inputs
-    if ( (!_theBus) || (i2cAddress < kCY8CMBRMinAddr) || (i2cAddress > kCY8CMBRMaxAddr) )
+    if ( (!_theBus) || (i2cAddress < kCY8CMBR3MinAddr) || (i2cAddress > kCY8CMBR3MaxAddr) )
         return false;
 
     sfe_cy8cmbr3_reg_i2c_addr_t regValue = {0}; // Create a register structure to hold the current register value
@@ -171,7 +89,49 @@ bool sfDevCY8CMBR3::_setI2CAddress(uint8_t i2cAddress){
     if (ksfTkErrOk != _theBus->writeRegister(ksfCY8CMBR3RegI2cAddr, i2cAddress))
         return false;
 
-    _i2cAddress = i2cAddress; // Update the internal I2C address
+    return true; // Return true to indicate success
+}
+
+bool sfDevCY8CMBR3::_readI2CAddress(uint8_t &i2cAddress){
+    // Ensure valid inputs
+    if ( !_theBus )
+        return false;
+
+    sfe_cy8cmbr3_reg_i2c_addr_t regValue = {0}; // Create a register structure to hold the current register value
+
+    // Read the I2C address from the device
+    if (ksfTkErrOk != _theBus->readRegister(ksfCY8CMBR3RegI2cAddr, regValue.byte))
+        return false;
+
+    i2cAddress = regValue.I2C_ADDRESS; // Get the 7-bit I2C address
+
+    return true; // Return true to indicate success
+}
+
+bool sfDevCY8CMBR3::defaultMoistureSensorInit(void)
+{
+    if (!enable(SID_0, true))
+        return false;
+
+    // By default we'll use the highest sensitivity
+    if (!setSensitivity(CS_SENSITIVITY_500_COUNTS_PER_PF, SID_0))
+        return false;
+    
+    // Set up refresh interval to 100ms
+    if (!setRefreshInterval(REFRESH_INTERVAL_100MS))
+        return false;
+
+    // Set GPO0 to be controlled by host, DC output, hi-z, active low
+    if (!setGPOConfig(true, false, false, false))
+        return false;
+    
+    // Ensure GPO0 is not driving the LED
+    if (!ledOff(GPO_0))
+        return false;
+
+    // Set sensor Id to SID_0
+    if (!setSensorId(SID_0))
+        return false;
 
     return true; // Return true to indicate success
 }
@@ -191,7 +151,7 @@ bool sfDevCY8CMBR3::setSensorId(sfe_cy8cmbr3_sensor_id_t sensorId)
     _currentSensorId = sensorId;
 }
 
-bool sfDevCY8CMBR3::setSensitivity(sfe_cy8cmbr3_sensor_id_t sensorId, sfe_cy8cmbr3_sensitivity_t sensitivity)
+bool sfDevCY8CMBR3::setSensitivity(sfe_cy8cmbr3_sensitivity_t sensitivity, sfe_cy8cmbr3_sensor_id_t sensorId)
 {
     // Ensure valid inputs
     if (    (!_theBus) 
@@ -231,6 +191,43 @@ bool sfDevCY8CMBR3::setSensitivity(sfe_cy8cmbr3_sensor_id_t sensorId, sfe_cy8cmb
 
     // Write the updated register value back to the device
     if (ksfTkErrOk != _theBus->writeRegister(regAddress, regValue.byte))
+        return false;
+
+    return true; // Return true to indicate success
+}
+
+bool sfDevCY8CMBR3::setRefreshInterval(sfe_cy8cmbr3_refresh_interval_t interval)
+{
+    // Ensure valid inputs
+    if ( (!_theBus) ||  (interval < REFRESH_INTERVAL_20MS) || (interval > REFRESH_INTERVAL_500MS) )
+        return false;
+    
+    sfe_cy8cmbr3_reg_refresh_ctrl_t regValue = {0}; // Create a register structure to hold the current register value
+
+    regValue.REFRESH_INTERVAL = static_cast<uint8_t>(interval); // Set the refresh interval
+
+    // Write the updated register value back to the device
+    if (ksfTkErrOk != _theBus->writeRegister(ksfCY8CMBR3RegRefreshCtrl, regValue.byte))
+        return false;
+
+    return true; // Return true to indicate success
+}
+
+bool sfDevCY8CMBR3::setGPOConfig(bool controlByHost, bool pwmOutput, bool strongDrive, bool activeHigh)
+{
+    // Ensure valid inputs
+    if ( !_theBus )
+        return false;
+    
+    sfe_cy8cmbr3_reg_gpo_cfg_t regValue = {0}; // Create a register structure to hold the current register value
+
+    regValue.GPO_CTL = controlByHost ? 1 : 0;
+    regValue.GPO_PWM = pwmOutput ? 1 : 0;
+    regValue.DRIVE_MODE = strongDrive ? 1 : 0;
+    regValue.ACTIVE_STATE = activeHigh ? 1 : 0;
+
+    // Write the updated register value back to the device
+    if (ksfTkErrOk != _theBus->writeRegister(ksfCY8CMBR3RegGpoCfg, regValue.byte))
         return false;
 
     return true; // Return true to indicate success
@@ -280,6 +277,8 @@ uint8_t sfDevCY8CMBR3::readCapacitancePF(sfe_cy8cmbr3_sensor_id_t sensorId)
     // Read the DEBUG_CP register to get the capacitance in pF
     if (ksfTkErrOk != _theBus->readRegister(ksfCY8CMBR3RegDebugCp, capacitancePF))
         return 0; // Return 0 to indicate error.
+    
+    _last_data_pF = capacitancePF; // Store the last read data
 
     return capacitancePF; // Return the capacitance value in pF
 }
@@ -359,12 +358,11 @@ bool sfDevCY8CMBR3::ledOn(bool ledOn, sfe_cy8cmbr3_gpo_t gpo)
     if (ksfTkErrOk != _theBus->readRegister(ksfCY8CMBR3RegGpoOutputState, regValue.byte))
         return false;
 
-    // Update the bit corresponding to our gpo param
+    // Update the bit corresponding to our gpo param (active low logic for LED)
     if (ledOn)
-        regValue.byte |= (1 << gpo); // Set the bit to turn on the LED
+        regValue.byte &= ~(1 << gpo); // Clear the bit to turn on the LED (active low)
     else
-        regValue.byte &= ~(1 << gpo); // Clear the bit to turn off the LED
-
+        regValue.byte |= (1 << gpo); // Set the bit to turn off the LED (active low)
 
     // Write the updated register value back to the device
     if (ksfTkErrOk != _theBus->writeRegister(ksfCY8CMBR3RegGpoOutputState, regValue.byte))

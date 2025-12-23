@@ -42,9 +42,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 // I2C Addressing
 ///////////////////////////////////////////////////////////////////////////////
-const uint8_t kCY8CMBRDefaultAddr = 0x39; // I2C address for the CY8CMBR3 device.
-const uint8_t kCY8CMBRMinAddr = 0x08;     // Minimum I2C address for the CY8CMBR3 device.
-const uint8_t kCY8CMBRMaxAddr = 0x77;     // Maximum I2C address for the CY8CMBR3 device.
+const uint8_t kCY8CMBR3DefaultAddr = 0x39; // I2C address for the CY8CMBR3 device.
+const uint8_t kCY8CMBR3MinAddr = 0x08;     // Minimum I2C address for the CY8CMBR3 device.
+const uint8_t kCY8CMBR3MaxAddr = 0x77;     // Maximum I2C address for the CY8CMBR3 device.
 
 // These are the default expeced ID values for the 102 device (CY8CMBR3102)
 const uint8_t kDefaultCY8CMBR3102FamilyID = 0x9A; // When polling the FAMILY_ID register, this should be returned on boot.
@@ -736,6 +736,35 @@ typedef enum {
     GPO_7 = 7
 } sfe_cy8cmbr3_gpo_t; 
 
+typedef enum {
+    REFRESH_INTERVAL_20MS = 1,
+    REFRESH_INTERVAL_40MS = 2,
+    REFRESH_INTERVAL_60MS = 3,
+    REFRESH_INTERVAL_80MS = 4,
+    REFRESH_INTERVAL_100MS = 5,
+    REFRESH_INTERVAL_120MS = 6,
+    REFRESH_INTERVAL_140MS = 7,
+    REFRESH_INTERVAL_160MS = 8,
+    REFRESH_INTERVAL_180MS = 9,
+    REFRESH_INTERVAL_200MS = 10,
+    REFRESH_INTERVAL_220MS = 11,
+    REFRESH_INTERVAL_240MS = 12,
+    REFRESH_INTERVAL_260MS = 13,
+    REFRESH_INTERVAL_280MS = 14,
+    REFRESH_INTERVAL_300MS = 15,
+    REFRESH_INTERVAL_320MS = 16,
+    REFRESH_INTERVAL_340MS = 17,
+    REFRESH_INTERVAL_360MS = 18,
+    REFRESH_INTERVAL_380MS = 19,
+    REFRESH_INTERVAL_400MS = 20,
+    REFRESH_INTERVAL_420MS = 21,
+    REFRESH_INTERVAL_440MS = 22,
+    REFRESH_INTERVAL_460MS = 23,
+    REFRESH_INTERVAL_480MS = 24,
+    REFRESH_INTERVAL_500MS = 25
+} sfe_cy8cmbr3_refresh_interval_t;
+
+
 ///////////////////////////////////////////////////////////////////////////////
 
 class sfDevCY8CMBR3
@@ -745,8 +774,7 @@ class sfDevCY8CMBR3
     {
     }
 
-    /// @brief This method is called to initialize the CY8CMBR3 device through the
-    /// specified bus.
+    /// @brief This method is called to set the communication bus directly and initialize the sensor.
     /// @param theBus Pointer to the bus object.
     /// @return True if successful, false if it fails.
     bool begin(sfTkIBus *theBus = nullptr);
@@ -774,7 +802,21 @@ class sfDevCY8CMBR3
     /// @param sensorId The sensor Id to set the sensitivity for.
     /// @param sensitivity The sensitivity value to set (0-3).
     /// @return True if successful, false if it fails.
-    bool setSensitivity(sfe_cy8cmbr3_sensor_id_t sensorId = SID_0, sfe_cy8cmbr3_sensitivity_t sensitivity);
+    bool setSensitivity(sfe_cy8cmbr3_sensitivity_t sensitivity = CS_SENSITIVITY_500_COUNTS_PER_PF, sfe_cy8cmbr3_sensor_id_t sensorId = SID_0);
+
+    /// @brief Set the refresh interval for the sensor.
+    /// @details This method sets the refresh interval by writing to the REFRESH_CTRL register.
+    /// @param interval The refresh interval to set (default is 100ms).
+    /// @return True if successful, false if it fails.
+    bool setRefreshInterval(sfe_cy8cmbr3_refresh_interval_t interval = REFRESH_INTERVAL_100MS);
+
+    /// @brief Set the GPO configuration.
+    /// @details This method sets the GPO configuration by writing to the GPO_CFG register.
+    /// @param controlByHost True to control GPO by host, false to control by sensor.
+    /// @param pwmOutput True to set GPO as PWM output, false for DC output
+    /// @param strongDrive True for strong drive mode, false for high-Z mode.
+    /// @param activeHigh True for active high, false for active low. (note we use active low since our LED is tied to GPO0 on it's low side)
+    bool setGPOConfig(bool controlByHost = true, bool pwmOutput = false, bool strongDrive = false, bool activeHigh = false);
 
     /// @brief Enable or disable sensor by sensor Id
     /// @details This method enables the specified sensor by setting the appropriate bits in the SENSOR_EN register.
@@ -820,17 +862,28 @@ class sfDevCY8CMBR3
     /// @return True if successful, false if it fails.
     bool ledOff(sfe_cy8cmbr3_gpo_t gpo = GPO_0);
 
+    /// @brief Initialize the moisture sensor with default settings.
+    /// @details This method initializes the moisture sensor with default settings
+    /// @return True if successful, false if it fails.
+    bool defaultMoistureSensorInit(void);
+
   protected:
     /// @brief Set the I2C address of the sensor.
     /// @details This method is responsible for sending the command to change the I2C slave address of the sensor.
     ///          It won't change the address of the communication bus, that is the caller's responsibility.
     /// @param i2cAddress The I2C address to set (7-bit).
+    /// @return True if successful, false if it fails.
     bool _setI2CAddress(uint8_t i2cAddress);
 
+    /// @brief Read the I2C address of the sensor.
+    /// @details This method reads the current I2C address from the sensor.
+    /// @param i2cAddress Reference to store the read I2C address (7-bit).
+    /// @return True if successful, false if it fails.
+    bool _readI2CAddress(uint8_t &i2cAddress);
+
   private:
-    sfe_cy8cmbr3_reg_diff_cnt_t _last_data_pF; // Last read data from the sensor.
+    sfe_cy8cmbr3_reg_debug_cp_t _last_data_pF; // Last read data from the sensor.
     sfe_cy8cmbr3_sensor_id_t _currentSensorId; // Current sensor Id for debug operations.
-    uint8_t _i2cAddress; // Current I2C address for the device.
 
     sfTkIBus *_theBus; // Pointer to bus device.
 };

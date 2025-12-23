@@ -32,15 +32,15 @@
  * - Qwiic 1x1: https://www.sparkfun.com/products/TODO
  *
  * @see https://github.com/sparkfun/SparkFun_CY8CMBR3_Arduino_Library
- */
+*/
 
- #pragma once
+#pragma once
 
- // clang-format off
- #include <SparkFun_Toolkit.h>
- #include "sfTk/sfDevCY8CMBR3.h"
- #include <Arduino.h>
- // clang-format on
+// clang-format off
+#include <SparkFun_Toolkit.h>
+#include "sfTk/sfDevCY8CMBR3.h"
+#include <Arduino.h>
+// clang-format on
  
 /**
  * @class SfeCY8CMBR3ArdI2C
@@ -65,6 +65,7 @@
  * @see TwoWire
  *
  */
+
 class SfeCY8CMBR3ArdI2C : public sfDevCY8CMBR3
 {
   public:
@@ -98,7 +99,7 @@ class SfeCY8CMBR3ArdI2C : public sfDevCY8CMBR3
      * }
      * @endcode
      */
-    bool begin(const uint8_t &address = kCY8CMBR3Addr, TwoWire &wirePort = Wire)
+    bool begin(const uint8_t &address = kCY8CMBR3DefaultAddr, TwoWire &wirePort = Wire)
     {
         if (_theI2CBus.init(wirePort, address) != ksfTkErrOk)
             return false;
@@ -139,31 +140,82 @@ class SfeCY8CMBR3ArdI2C : public sfDevCY8CMBR3
 
         // For now, we only support the CY8CMBR3102 device ussed in our soil moisture sensor
         // if more devices are supported in the future, this check may need to be updated
-        // Check the device ID
-        
+        // Check the device ID and family ID
         return (kDefaultCY8CMBR3102DeviceID == getDeviceID()) && (kDefaultCY8CMBR3102FamilyID == getFamilyID());
 
+    }
+
+    /**
+     * @brief Sets the I2C address of the CY8CMBR3 sensor.
+     *
+     * @details
+     * This method updates the I2C address used for communication with the sensor.
+     *
+     * @param i2cAddress The new I2C address to set
+     * @return true If address set successfully
+     * @return false If setting the address fails
+     *
+     * Example:
+     * @code
+     * SfeCY8CMBR3ArdI2C sensor;
+     * if (!sensor.setI2CAddress(0x2A)) {
+     *     Serial.println("Failed to set I2C address!");
+     * }
+     * @endcode
+     */
+    bool setI2CAddress(uint8_t i2cAddress)
+    {
+        // First set the address on the device itself 
+        if (!_setI2CAddress(i2cAddress))
+            return false;
+        
+        // Now set the address on the bus interface so we can communicate at the new address
+        _theI2CBus.setAddress(i2cAddress);
+        
+        return true;
     }
 
     /**
      * @brief Gets the currently configured I2C address of the CY8CMBR3 sensor.
      *
      * @details
-     * Returns the I2C address currently being used to communicate with the sensor.
+     * Returns the I2C addresses currently being used to communicate with the sensor.
      *
-     * @return uint8_t The current I2C address
+     * @param busAddress Reference to store the read I2C bus address (currently set in the bus interface)
+     * @param deviceAddress Reference to store the read device I2C address (from reading sensor register)
+     * 
+     * @return bool true If address retrieved successfully, false if it fails
      *
      * Example:
      * @code
      * SfeCY8CMBR3ArdI2C sensor;
-     * uint8_t address = sensor.getDeviceAddress();
-     * Serial.print("Current I2C address: 0x");
-     * Serial.println(address, HEX);
+     * uint8_t busAddress, deviceAddress;
+     * if (sensor.getDeviceAddress(busAddress, deviceAddress)) {
+     *    Serial.print("Bus Address: 0x");
+     *    Serial.println(busAddress, HEX);
+     *    Serial.print("Device Address: 0x");
+     *    Serial.println(deviceAddress, HEX);
+     *    if (busAddress != deviceAddress) {
+     *       // If this is the case, call setI2CAddress to fix it
+     *       Serial.println("Warning: Bus and Device addresses do not match!");
+     *    } 
+     * }
+     * else {
+     *    Serial.println("Failed to get I2C addresses!");
+     * }
      * @endcode
      */
-    uint8_t getDeviceAddress(void)
-    {   
-        return _theI2CBus.address();
+    bool getI2CAddress(uint8_t &busAddress, uint8_t &deviceAddress)
+    {
+        deviceAddress = 0;
+        if (!_theI2CBus.address())
+            return false;
+
+        busAddress = _theI2CBus.address();
+        if (!_readI2CAddress(deviceAddress))
+            return false;
+
+        return true;
     }
 
   private:

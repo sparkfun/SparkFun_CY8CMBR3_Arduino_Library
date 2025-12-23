@@ -1,8 +1,7 @@
 /*
   Using the CY8CMBR3 Sensor.
 
-  This example shows how to setup the CY8CMBR3 sensor with default settings and
-  use it for basic capacitance readings from a moisture sensor.
+  This example shows how to setup the CY8CMBR3 sensor and use its LED.
 
   SparkFun Electronics
   Date: 2025/12
@@ -21,12 +20,14 @@
 #include <SparkFun_CY8CMBR3.h>
 
 SfeCY8CMBR3ArdI2C mySensor;
+// Capacitance threshold for LED control. If the capacitance is below this value, turn on the LED.
+uint8_t threshold = 50; 
 
 void setup()
 {
     // Start serial
     Serial.begin(115200);
-    Serial.println("CY8CMBR3 Example 1 - Basic Readings");
+    Serial.println("CY8CMBR3 Example 3 - LED"); 
     
     // Start the underlying Arduino I2C bus
     Wire.begin();
@@ -46,13 +47,8 @@ void setup()
 void loop()
 {   
     // Read capacitance in pF
-    // TODO: assess whether this value, or base + diff counts is more useful (balance of range vs resolution)
     uint8_t capacitance = mySensor.readCapacitancePF();
-    
-    // Wet soil has a higher dialectric constant as it can hold more charge
-    // thus it will yield a higher capacitance reading (in pF) than dry soil.
-    // For more on capacitance and soil moisture sensing, see:
-    // https://metergroup.com/measurement-insights/soil-moisture-sensors-how-they-work-why-some-are-not-research-grade/
+
     if (capacitance == 0)
     {
         Serial.println("Failed to read capacitance.");
@@ -63,5 +59,17 @@ void loop()
         Serial.print(capacitance);
         Serial.println(" pF");
     }
+
+    if (capacitance < threshold)
+    {
+        mySensor.ledOn();
+        Serial.println("LED ON - Soil moisture is below threshold.");
+    }
+    else 
+    {
+        mySensor.ledOff();
+        Serial.println("LED OFF - Soil moisture is above threshold.");
+    }
+
     delay(1000);
 }
