@@ -62,23 +62,20 @@ void setup()
 void loop()
 {   
     // Read capacitance in pF from each sensor 
-    // Note we need to set the I2C address for each before reading
-    for (int i = 0 ; i < 4; i++){
-        if (!mySensors[i].setI2CAddress(sensorAddresses[i]))
+    // Note we again need to set the I2C address for each before reading
+    for (int i = 0 ; i < 4; i++)
+    {   if (!mySensors[i].setI2CAddress(sensorAddresses[i]))
         {
             Serial.print("Failed to set I2C address for sensor ");
             Serial.print(i);
             Serial.println(" before reading capacitance.");
         }
-    }
-    for (int i = 0 ; i < 4; i++)
-    {
         uint8_t capacitance = mySensors[i].readCapacitancePF();
         if (capacitance == 0)
         {
             Serial.print("Sensor ");
             Serial.print(i);
-            Serial.println(" failed to read capacitance.");
+            Serial.println(" failed to read capacitance or capacitance is 0.");
         }
         else
         {

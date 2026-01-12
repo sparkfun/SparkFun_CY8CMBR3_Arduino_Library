@@ -66,6 +66,8 @@
  *
  */
 
+ const uint8_t kMaxConnectAttempts = 10; ///< Maximum number of connection attempts
+
 class SfeCY8CMBR3ArdI2C : public sfDevCY8CMBR3
 {
   public:
@@ -101,15 +103,41 @@ class SfeCY8CMBR3ArdI2C : public sfDevCY8CMBR3
      */
     bool begin(const uint8_t &address = kCY8CMBR3DefaultAddr, TwoWire &wirePort = Wire)
     {
-        if (_theI2CBus.init(wirePort, address) != ksfTkErrOk)
-            return false;
+        Serial.println("In SfeCY8CMBR3ArdI2C::begin()...");
 
+        uint8_t connectAttempts = 0;
+        
+        // Retry calling init on the I2C bus up to kMaxConnectAttempts times
+        // since the spec says the device may nack until it's ready
+        // If successful break out of loop, otherwise return false after max attempts
+
+        while (connectAttempts < kMaxConnectAttempts){
+            Serial.print("Connection attempt ");
+            Serial.println(connectAttempts + 1);
+            if (_theI2CBus.init(wirePort, address) == ksfTkErrOk){
+                Serial.println("I2C bus initialized successfully");
+                break; // Success
+            }
+            connectAttempts++;
+        }
+
+        if (connectAttempts == kMaxConnectAttempts){
+            Serial.println("Failed to initialize I2C bus after max attempts");
+            return false; // Failed after max attempts
+        }
+
+        Serial.println("I2C bus initialized");
         setCommunicationBus(&_theI2CBus);
 
         // Perform the necessary checks to set up the device
 
-        if (!isConnected())
+        Serial.println("Checking device connection...");
+        if (!isConnected()){
+            Serial.println("Device connection check failed");
             return false;
+        }
+
+        Serial.println("Device connected successfully");
         return true;
     }
 
@@ -135,8 +163,23 @@ class SfeCY8CMBR3ArdI2C : public sfDevCY8CMBR3
      */
     bool isConnected(void)
     {
-        if (_theI2CBus.ping() != ksfTkErrOk)
-            return false;
+        // Since the device may nack until it's ready, we must perform this ping 
+        // repeatedly as well
+
+        uint8_t connectAttempts = 0;
+        while (connectAttempts < kMaxConnectAttempts){
+            Serial.print("Ping attempt ");
+            Serial.println(connectAttempts + 1);
+            if (_theI2CBus.ping() == ksfTkErrOk){
+                Serial.println("Ping successful");
+                break; // Success
+            }
+            connectAttempts++;
+        }
+        if (connectAttempts == kMaxConnectAttempts){
+            Serial.println("Failed to ping device after max attempts");
+            return false; // Failed after max attempts
+        }
 
         // For now, we only support the CY8CMBR3102 device ussed in our soil moisture sensor
         // if more devices are supported in the future, this check may need to be updated

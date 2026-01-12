@@ -42,13 +42,13 @@
 ///////////////////////////////////////////////////////////////////////////////
 // I2C Addressing
 ///////////////////////////////////////////////////////////////////////////////
-const uint8_t kCY8CMBR3DefaultAddr = 0x39; // I2C address for the CY8CMBR3 device.
+const uint8_t kCY8CMBR3DefaultAddr = 0x37; // I2C address for the CY8CMBR3 device.
 const uint8_t kCY8CMBR3MinAddr = 0x08;     // Minimum I2C address for the CY8CMBR3 device.
 const uint8_t kCY8CMBR3MaxAddr = 0x77;     // Maximum I2C address for the CY8CMBR3 device.
 
 // These are the default expeced ID values for the 102 device (CY8CMBR3102)
 const uint8_t kDefaultCY8CMBR3102FamilyID = 0x9A; // When polling the FAMILY_ID register, this should be returned on boot.
-const uint8_t kDefaultCY8CMBR3102DeviceID = 0xA01; // When polling the DEVICE_ID register, this should be returned on boot.
+const uint16_t kDefaultCY8CMBR3102DeviceID = 0xA01; // When polling the DEVICE_ID register, this should be returned on boot.
 
 ///////////////////////////////////////////////////////////////////////////////
 // Register Map
@@ -764,6 +764,41 @@ typedef enum {
     REFRESH_INTERVAL_500MS = 25
 } sfe_cy8cmbr3_refresh_interval_t;
 
+// Host commands for the CTRL_CMD register
+typedef enum {
+    CTRL_CMD_NO_OP = 0,
+    CTRL_CMD_SAVE_CONFIG = 2, //Checks CONFIG_CRC vs. a calculated CRC; if they match, saves current config to non-volatile memory
+    CTRL_CMD_CALC_CRC = 3, //Calculates CRC over config registers and stores result in CALC_CRC register
+    CTRL_CMD_DEEP_SLEEP = 7, //Puts device into Deep Sleep mode
+    CTRL_CMD_RESET_LATCH = 8, //Resets all latched button and proximity status bits
+    CTRL_CMD_ALP_RESET_PS0 = 9, //Resets ALP filter for proximity sensor 0
+    CTRL_CMD_ALP_RESET_PS1 = 10, //Resets ALP filter for proximity sensor 1
+    CTRL_CMD_SW_RESET = 255 //Performs a software reset of the entire device
+} sfe_cy8cmbr3_ctrl_cmd_t;
+
+// Host command errors
+typedef enum {
+    CTRL_CMD_ERR_NO_ERROR = 0,
+    CTRL_CMD_ERR_SAVE_FAILED = 253,
+    CTRL_CMD_ERR_CRC_FAILED = 254,
+    CTRL_CMD_ERR_INVALID_CMD = 255
+} sfe_cy8cmbr3_ctrl_cmd_err_t;
+
+typedef enum {
+    SPO_DISABLED = 0,
+    SPO_CAP_SENSE = 1,
+    SPO_SHIELD_ELEC = 2,
+    SPO_BUZZER = 3,
+    SPO_HOST_INT = 4,
+    SPO_GPO = 5
+} sfe_cy8cmbr3_spo_config_t;
+
+typedef enum {
+    AUTO_RESET_TIMEOUT_DISABLED = 0,
+    AUTO_RESET_TIMEOUT_5_SECONDS = 1,
+    AUTO_RESET_TIMEOUT_20_SECONDS = 2,
+} sfe_cy8cmbr3_auto_reset_timeout_t;
+
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -791,11 +826,44 @@ class sfDevCY8CMBR3
     /// @param theBus Bus to set as the communication device.
     void setCommunicationBus(sfTkIBus *theBus);
 
+    /// @brief Checks if the last sent control command is complete.
+    /// @return True if the command is complete, false if it is still in progress.
+    bool isCtrlCommandComplete(void);
+
+    /// @brief Sends a control command to the sensor.
+    /// @param command The control command to send.
+    /// @return True if successful, false if it fails.
+    bool sendCtrlCommand(sfe_cy8cmbr3_ctrl_cmd_t command);
+
+    /// @brief Save the current configuration to non-volatile memory.
+    /// @details This method saves the current configuration to non-volatile memory by sending the SAVE_CONFIG command.
+    ///          the device will require a reset or power cycle to load the saved configuration and leave CONFIG state.
+    /// @return True if successful, false if it fails.
+    bool saveConfig(void);
+
+    /// @brief Perform a software reset of the sensor.
+    /// @details This method performs a software reset of the sensor by sending the SW_RESET command.
+    /// @return True if successful, false if it fails.
+    bool reset(void);
+
+    /// @brief Reads target register while waiting for the sync counter on either end of the target register to be equal indicating data is valid.
+    /// @param register The data register we are reading from
+    /// @param data Reference to store the read data.
+    /// @param retries The number of times to retry checking the sync counters before giving up.
+    /// @return True if successful, false if it fails.
+    bool readWithSyncCounter(uint8_t reg, uint8_t &data, uint8_t retries = 10);
+    bool readWithSyncCounter(uint8_t reg, uint16_t &data, uint8_t retries = 10);
+
     /// @brief Set the sensor Id 
     /// @param sensorId The sensor Id to set.
     /// @details This will set the sensor Id (and by extension the debug sensor Id) for debug operations.
     /// @return True if successful, false if it fails.
     bool setSensorId(sfe_cy8cmbr3_sensor_id_t sensorId = SID_0);
+
+    /// @brief Get the current debug sensor Id
+    /// @details This method gets the current debug sensor Id by reading from the DEBUG_SENSOR_ID register.
+    /// @return The current debug sensor Id.
+    sfe_cy8cmbr3_sensor_id_t getDebugSensorId(void);
 
     /// @brief Set sensitivity for the specified sensor Id
     /// @details This method sets the sensitivity for the specified sensor by writing to the SENSITIVITY0 register.
@@ -804,11 +872,52 @@ class sfDevCY8CMBR3
     /// @return True if successful, false if it fails.
     bool setSensitivity(sfe_cy8cmbr3_sensitivity_t sensitivity = CS_SENSITIVITY_500_COUNTS_PER_PF, sfe_cy8cmbr3_sensor_id_t sensorId = SID_0);
 
+    /// @brief Get sensitivity for the specified sensor Id
+    /// @details This method gets the sensitivity for the specified sensor by reading from the SENSITIVITY0 register.
+    /// @param sensorId The sensor Id to get the sensitivity for.
+    sfe_cy8cmbr3_sensitivity_t getSensitivity(sfe_cy8cmbr3_sensor_id_t sensorId = SID_0);
+
+    /// @brief Enable or disable the auto-threshold feature.
+    /// @details This method enables or disables the auto-threshold feature by setting the ATH_EN bit in the DEVICE_CFG2 register.
+    /// @param enable True to enable auto-threshold, false to disable.
+    /// @return True if successful, false if it fails.
+    bool setAutoThresholdEnable(bool enable = true);
+
+    /// @brief Enable or disable the auto-reset feature.
+    /// @details This method enables or disables the auto-reset feature by setting the BUTTON_SLD_ARST bits in the DEVICE_CFG2 register.
+    /// @param enable True to enable auto-reset, false to disable.
+    /// @return True if successful, false if it fails.
+    bool setAutoResetEnable(bool enable = true, sfe_cy8cmbr3_auto_reset_timeout_t timeout = AUTO_RESET_TIMEOUT_5_SECONDS);
+
+    /// @brief Enable or disable system diagnostics.
+    /// @details This method enables or disables system diagnostics by setting the SYSD_EN bit in the DEVICE_CFG1 register.
+    /// @param enable True to enable system diagnostics, false to disable.
+    /// @return True if successful, false if it fails.
+    bool setSystemDiagnosticsEnable(bool enable = true);
+
     /// @brief Set the refresh interval for the sensor.
     /// @details This method sets the refresh interval by writing to the REFRESH_CTRL register.
     /// @param interval The refresh interval to set (default is 100ms).
     /// @return True if successful, false if it fails.
     bool setRefreshInterval(sfe_cy8cmbr3_refresh_interval_t interval = REFRESH_INTERVAL_100MS);
+
+    /// @brief Set the SPO0 configuration
+    /// @details This method sets the SPO0 configuration by writing to the SPO_CFG register.
+    /// @param config The configuration for SPO0 (default is GPO).
+    bool setSPO0Config(sfe_cy8cmbr3_spo_config_t config = SPO_GPO);
+
+    /// @brief  Enable or disable proximity sensing for the specified sensor Id
+    /// @param enable True to enable proximity sensing, false to disable.
+    /// @param sensorId The sensor Id to enable or disable proximity sensing for (Only SID_0 and SID_1 are valid).
+    /// @return True if successful, false if it fails.
+    bool setProxEnable(bool enable = false, sfe_cy8cmbr3_sensor_id_t sensorId = SID_0);
+
+    /// @brief Set the base threshold for the specified sensor Id
+    /// @details This method sets the base threshold for the specified sensor by writing to the BASE_THRESHOLDx register.
+    /// @param threshold The base threshold value to set (0-255).
+    /// @param sensorId The sensor Id to set the base threshold for.
+    /// @return True if successful, false if it fails.
+    bool setBaseThreshold(uint8_t threshold = 128, sfe_cy8cmbr3_sensor_id_t sensorId = SID_0);
 
     /// @brief Set the GPO configuration.
     /// @details This method sets the GPO configuration by writing to the GPO_CFG register.
@@ -816,7 +925,31 @@ class sfDevCY8CMBR3
     /// @param pwmOutput True to set GPO as PWM output, false for DC output
     /// @param strongDrive True for strong drive mode, false for high-Z mode.
     /// @param activeHigh True for active high, false for active low. (note we use active low since our LED is tied to GPO0 on it's low side)
-    bool setGPOConfig(bool controlByHost = true, bool pwmOutput = false, bool strongDrive = false, bool activeHigh = false);
+    bool setGPOConfig(bool controlByHost = true, bool pwmOutput = false, bool strongDrive = true, bool activeHigh = false);
+
+    /// @brief Get the GPO configuration.
+    /// @details This method gets the GPO configuration by reading from the GPO_CFG register.
+    /// @param None
+    /// @return The GPO configuration.
+    sfe_cy8cmbr3_reg_gpo_cfg_t getGPOConfig(void);
+
+    /// @brief Enable or disable GPO toggle.
+    /// @param enable True to enable GPO toggle, false to disable.
+    /// @param gpo The GPO to set the toggle enable for.
+    /// @return True if successful, false if it fails.
+    bool setGPOToggleEnable(bool enable = false, sfe_cy8cmbr3_gpo_t gpo = GPO_0);
+
+    /// @brief Get the current GPO output state.
+    /// @details This method gets the current GPO output state by reading from the GPO_OUTPUT_STATE register.
+    /// @param None
+    /// @return The current GPO output state.
+    uint8_t getGPOOutputState(void);
+
+    /// @brief Get the current GPO data.
+    /// @details This method gets the current GPO data by reading from the GPO_DATA register.
+    /// @param None
+    /// @return The current GPO data.
+    uint8_t getGPOData(void);
 
     /// @brief Enable or disable sensor by sensor Id
     /// @details This method enables the specified sensor by setting the appropriate bits in the SENSOR_EN register.
@@ -833,6 +966,12 @@ class sfDevCY8CMBR3
 
     /// @brief Reads the difference count value from the sensor.
     /// @details This method reads the difference count from the DEBUG_DIFFERENCE_COUNTx register.
+    /// @param sensorId The sensor Id to read the difference count from.
+    /// @return The difference count value (or 0 on error).
+    uint16_t readDebugDifferenceCount(sfe_cy8cmbr3_sensor_id_t sensorId = SID_0);
+
+    /// @brief Reads the difference count value from the sensor.
+    /// @details This method reads the difference count from the DIFFERENCE_COUNTx register.
     /// @param sensorId The sensor Id to read the difference count from.
     /// @return The difference count value (or 0 on error).
     uint16_t readDifferenceCount(sfe_cy8cmbr3_sensor_id_t sensorId = SID_0);
@@ -882,6 +1021,11 @@ class sfDevCY8CMBR3
     bool _readI2CAddress(uint8_t &i2cAddress);
 
   private:
+    bool _writeWithRetry(uint8_t regAddress, uint8_t data);
+    bool _writeWithRetry(uint8_t regAddress, uint16_t data);
+    bool _readWithRetry(uint8_t regAddress, uint8_t &data);
+    bool _readWithRetry(uint8_t regAddress, uint16_t &data);
+
     sfe_cy8cmbr3_reg_debug_cp_t _last_data_pF; // Last read data from the sensor.
     sfe_cy8cmbr3_sensor_id_t _currentSensorId; // Current sensor Id for debug operations.
 

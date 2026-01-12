@@ -26,25 +26,56 @@ void setup()
 {
     // Start serial
     Serial.begin(115200);
+    delay(1000);
     Serial.println("CY8CMBR3 Example 1 - Basic Readings");
     
     // Start the underlying Arduino I2C bus
     Wire.begin();
 
     // Initialize CY8CMBR3 sensor
-    mySensor.begin();
+    if (!mySensor.begin())
+    {
+        Serial.println("Sensor failed to begin. Please check your wiring!");
+        Serial.println("Halting...");
+        while (1); // Enter infinite loop if we reach this failure
+    }
 
     // Initialize as a moisture sensor (with default settings)
     if (!mySensor.defaultMoistureSensorInit())
     {
         Serial.println("Sensor failed to initialize. Please check your wiring!");
         Serial.println("Halting...");
-        while (1); // Enter infinite loop if we reach this failure
+        while (1){
+          Serial.println("Halted after sensor failure...");
+          delay(2000);
+        } // Enter infinite loop if we reach this failure
     }
+
+    // TODO: maybe put these two into the same command and maybe also combine into the init function...
+    // Save the config
+    // if (!mySensor.saveConfig()) {
+    //   Serial.println("Saving Config Failed!");
+    //   while(1){}
+    // }
+
+    // if (!mySensor.reset()){
+    //   Serial.println("Reset Failed!");
+    //   while(1){}
+    // }
 }
 
 void loop()
 {   
+    // Initialize as a moisture sensor (with default settings)
+    if (!mySensor.defaultMoistureSensorInit())
+    {
+        Serial.println("Sensor failed to initialize. Please check your wiring!");
+        Serial.println("Halting...");
+        while (1){
+          Serial.println("Halted after sensor failure...");
+          delay(2000);
+        } // Enter infinite loop if we reach this failure
+    }
     // Read capacitance in pF
     // TODO: assess whether this value, or base + diff counts is more useful (balance of range vs resolution)
     uint8_t capacitance = mySensor.readCapacitancePF();
@@ -63,5 +94,9 @@ void loop()
         Serial.print(capacitance);
         Serial.println(" pF");
     }
-    delay(1000);
+    // if (!mySensor.reset()) {
+    //   Serial.println("Reset Failed!");
+    // }
+    
+    delay(5000);
 }
