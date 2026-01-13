@@ -50,34 +50,11 @@ void setup()
           delay(2000);
         } // Enter infinite loop if we reach this failure
     }
-
-    // TODO: maybe put these two into the same command and maybe also combine into the init function...
-    // Save the config
-    // if (!mySensor.saveConfig()) {
-    //   Serial.println("Saving Config Failed!");
-    //   while(1){}
-    // }
-
-    // if (!mySensor.reset()){
-    //   Serial.println("Reset Failed!");
-    //   while(1){}
-    // }
 }
 
 void loop()
 {   
-    // Initialize as a moisture sensor (with default settings)
-    if (!mySensor.defaultMoistureSensorInit())
-    {
-        Serial.println("Sensor failed to initialize. Please check your wiring!");
-        Serial.println("Halting...");
-        while (1){
-          Serial.println("Halted after sensor failure...");
-          delay(2000);
-        } // Enter infinite loop if we reach this failure
-    }
     // Read capacitance in pF
-    // TODO: assess whether this value, or base + diff counts is more useful (balance of range vs resolution)
     uint8_t capacitance = mySensor.readCapacitancePF();
     
     // Wet soil has a higher dialectric constant as it can hold more charge
@@ -94,9 +71,6 @@ void loop()
         Serial.print(capacitance);
         Serial.println(" pF");
     }
-    // if (!mySensor.reset()) {
-    //   Serial.println("Reset Failed!");
-    // }
     
-    delay(5000);
+    delay(500);
 }

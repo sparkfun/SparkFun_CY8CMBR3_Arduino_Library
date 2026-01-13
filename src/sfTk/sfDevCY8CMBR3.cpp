@@ -374,6 +374,13 @@ bool sfDevCY8CMBR3::defaultMoistureSensorInit(void)
         return false;
     }
 
+    if (!setAutoResetEnable()){
+        #if DEBUG_SERIAL_PRINTS
+        Serial.println("Failed to enable auto reset");
+        #endif
+        return false;
+    }
+
     return true; // Return true to indicate success
 }
 
@@ -762,11 +769,11 @@ uint8_t sfDevCY8CMBR3::readCapacitancePF(sfe_cy8cmbr3_sensor_id_t sensorId)
         )
         return 0; // Return 0 to indicate error.
     
-    //TODO: look into this and remove if unnecessary
+    
     // From datasheet 1.5.123 DEBUG_CP register (measurement is updated whenever there is a change in value of SENSOR_ID register)
     // So, we'll first set the sensor ID to something else and then back to the desired sensorId to force an update.
-    // if (!setSensorId(sensorId == SID_0 ? SID_1 : SID_0))
-    //     return 0; // Return 0 to indicate error.
+    if (!setSensorId(sensorId == SID_0 ? SID_1 : SID_0))
+        return 0; // Return 0 to indicate error.
 
     // Set the debug sensor Id to the specified sensorId
     if (!setSensorId(sensorId))

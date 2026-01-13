@@ -99,12 +99,12 @@ void setup()
         while (1); // Enter infinite loop if we reach this failure
     }
 
-    if (!mySensor.setAutoResetEnable())
-    {
-      Serial.println("Failed Auto Reset Enable!");
-      Serial.println("Halting...");
-      while (1); // Enter infinite loop if we reach this failure
-    }
+    // if (!mySensor.setAutoResetEnable())
+    // {
+    //   Serial.println("Failed Auto Reset Enable!");
+    //   Serial.println("Halting...");
+    //   while (1); // Enter infinite loop if we reach this failure
+    // }
 }
 
 void loop()
@@ -178,8 +178,8 @@ void loop()
         Serial.println(diffCounts);
     // }
 
-    // Read debug capacitance of other sensor (to debug...)
-    uint8_t capacitancePF = mySensor.readCapacitancePF(SID_1);
+    // // Read debug capacitance in pF
+    uint8_t capacitancePF = mySensor.readCapacitancePF(SID_0);
     if (capacitancePF == 0)
     {
         Serial.println("Failed to read capacitance.");
@@ -193,24 +193,6 @@ void loop()
         // Serial.println(capacitancePF, HEX);
     }
     uint8_t sensorID = mySensor.getDebugSensorId();
-    Serial.print("Sensor ID: ");
-    Serial.println(sensorID);
-
-    // // Read debug capacitance in pF
-    capacitancePF = mySensor.readCapacitancePF(SID_0);
-    if (capacitancePF == 0)
-    {
-        Serial.println("Failed to read capacitance.");
-    }
-    else
-    {
-        Serial.print("\"Debug\" Capacitance: ");
-        Serial.print(capacitancePF);
-        Serial.println(" pF");
-        // Serial.print("Hex: 0x");
-        // Serial.println(capacitancePF, HEX);
-    }
-    sensorID = mySensor.getDebugSensorId();
     Serial.print("Sensor ID: ");
     Serial.println(sensorID);
 

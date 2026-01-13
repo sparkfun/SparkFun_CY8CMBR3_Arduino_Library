@@ -69,7 +69,7 @@ void loop()
     Serial.println("-------------------------------");
     Serial.println();
 
-    delay(500);
+    delay(250);
     mySensor.ledOn(true);
 
     Serial.println("LED ON");
@@ -89,7 +89,7 @@ void loop()
     Serial.println("-------------------------------");
     Serial.println();
 
-    delay(500);
+    delay(1000);
     // // Read capacitance in pF
     // uint16_t capacitance = mySensor.readRawCount();
 
