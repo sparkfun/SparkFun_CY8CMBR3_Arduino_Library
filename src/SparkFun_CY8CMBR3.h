@@ -215,6 +215,15 @@ class SfeCY8CMBR3ArdI2C : public sfDevCY8CMBR3
         // Now set the address on the bus interface so we can communicate at the new address
         _theI2CBus.setAddress(i2cAddress);
         
+        uint8_t completionRetries = 10;
+        // We will wait for the reset command in the _setI2CAddress() method to complete (via polling from the new i2c address)
+        // before moving on
+        while (completionRetries--){
+            if (isCtrlCommandComplete())
+                break;
+            delay(100);
+        }
+        
         return true;
     }
 

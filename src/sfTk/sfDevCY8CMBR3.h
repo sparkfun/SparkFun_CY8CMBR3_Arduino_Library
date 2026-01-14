@@ -853,8 +853,9 @@ class sfDevCY8CMBR3
 
     /// @brief Perform a software reset of the sensor.
     /// @details This method performs a software reset of the sensor by sending the SW_RESET command.
+    /// @param waitForCompletion If true, the function will wait until the reset is complete before returning.
     /// @return True if successful, false if it fails.
-    bool reset(void);
+    bool reset(bool waitForCompletion = true);
 
     /// @brief Reads target register while waiting for the sync counter on either end of the target register to be equal indicating data is valid.
     /// @param register The data register we are reading from

@@ -108,8 +108,9 @@ bool sfDevCY8CMBR3::_setI2CAddress(uint8_t i2cAddress){
         return false;
     }
         
-    
-    if (!reset()){
+    // Note the "false" parameter passed to reset() to indicate we do not want to wait for completion
+    // (after the reset the new I2C address will take effect so we cannot wait for completion)
+    if (!reset(false)){
         #if DEBUG_SERIAL_PRINTS
         Serial.println("Failed to reset device after setting I2C address.");
         #endif
@@ -318,9 +319,9 @@ bool sfDevCY8CMBR3::readWithSyncCounter(uint8_t reg, uint16_t &data, uint8_t ret
     return false;
 }
 
-bool sfDevCY8CMBR3::reset(void){
+bool sfDevCY8CMBR3::reset(bool waitForCompletion){
     // Send the SW_RESET command to perform a software reset
-    if (!sendCtrlCommand(CTRL_CMD_SW_RESET))
+    if (!sendCtrlCommand(CTRL_CMD_SW_RESET, waitForCompletion))
         return false;
 
     return true; // Return true to indicate success

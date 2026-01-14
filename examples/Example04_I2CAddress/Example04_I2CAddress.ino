@@ -21,12 +21,12 @@
 #include <SparkFun_CY8CMBR3.h>
 
 SfeCY8CMBR3ArdI2C mySensor;
-uint8_t address = 0x50; // Change this to your new address if you have modified it
-uint8_t newAddress = kCY8CMBR3DefaultAddr; // Example new address to set (addresses from 0x08 to 0x77 are valid)
+uint8_t address = kCY8CMBR3DefaultAddr; // Change this to your new address if you have modified it
+uint8_t newAddress = 0x50; // Example new address to set (addresses from 0x08 to 0x77 are valid)
 
 void setup()
 {
-    delay(2000);
+    delay(1000);
     // Start serial
     Serial.begin(115200);
     Serial.println("CY8CMBR3 Example 4 - I2C Address"); 
@@ -36,16 +36,6 @@ void setup()
 
     // Initialize CY8CMBR3 sensor, note how we pass in the old address
     mySensor.begin(address);
-
-    uint8_t testBus = 0, testDevice = 0;
-
-    mySensor.getI2CAddress(testBus, testDevice);
-
-    Serial.print("Test Bus Addr: ");
-    Serial.println(testBus);
-
-    Serial.print("Test Device Addr: ");
-    Serial.println(testDevice);
 
     // Change the I2C address
     if (mySensor.setI2CAddress(newAddress))
