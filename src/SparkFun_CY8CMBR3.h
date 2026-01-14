@@ -211,7 +211,7 @@ class SfeCY8CMBR3ArdI2C : public sfDevCY8CMBR3
         // First set the address on the device itself 
         if (!_setI2CAddress(i2cAddress))
             return false;
-        
+
         // Now set the address on the bus interface so we can communicate at the new address
         _theI2CBus.setAddress(i2cAddress);
         

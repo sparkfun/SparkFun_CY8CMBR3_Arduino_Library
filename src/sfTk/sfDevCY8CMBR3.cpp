@@ -34,8 +34,6 @@
 #include "Arduino.h" 
 // #endif
 
-// consts
-
 bool sfDevCY8CMBR3::begin(sfTkIBus *theBus)
 {
     // Nullptr check.
@@ -56,11 +54,11 @@ uint16_t sfDevCY8CMBR3::getDeviceID(void)
     sfe_cy8cmbr3_reg_device_id_t devID; // Create a variable to hold the device ID.
 
     if (!_theBus)
-        return 0; // Return 0 to indicate error.
+        return 0x00; // Return 0x00 to indicate error.
     
-    // Read the device ID register. If it errors, then return 0.
+    // Read the device ID register. If it errors, then return 0x00.
     if (!_readWithRetry(ksfCY8CMBR3RegDeviceId, devID.word))
-        return 0; // Return 0 to indicate error.
+        return 0x00; // Return 0x00 to indicate error.
     
     // TODO: Depending on endianness, may need to byte-swap here.
 
@@ -92,8 +90,31 @@ bool sfDevCY8CMBR3::_setI2CAddress(uint8_t i2cAddress){
         return false;
 
     // Set the I2C address in the device while using the old address to communicate
-    if (!_writeWithRetry(ksfCY8CMBR3RegI2cAddr, i2cAddress))
+    if (!_writeWithRetry(ksfCY8CMBR3RegI2cAddr, i2cAddress)){
+        #if DEBUG_SERIAL_PRINTS
+        Serial.print("Failed to write I2C address to I2C_ADDR register: 0x");
+        Serial.println(i2cAddress, HEX);
+        #endif
+
         return false;
+    }
+        
+
+    // The new address will only take effect once the configuration is saved and the device is reset
+    if (!saveConfig()){
+        #if DEBUG_SERIAL_PRINTS
+        Serial.println("Failed to save configuration after setting I2C address.");
+        #endif
+        return false;
+    }
+        
+    
+    if (!reset()){
+        #if DEBUG_SERIAL_PRINTS
+        Serial.println("Failed to reset device after setting I2C address.");
+        #endif
+        return false;
+    }
 
     return true; // Return true to indicate success
 }
@@ -128,7 +149,7 @@ bool sfDevCY8CMBR3::isCtrlCommandComplete(void){
     return (ctrlCmd == CTRL_CMD_NO_OP);
 }
 
-bool sfDevCY8CMBR3::sendCtrlCommand(sfe_cy8cmbr3_ctrl_cmd_t command){
+bool sfDevCY8CMBR3::sendCtrlCommand(sfe_cy8cmbr3_ctrl_cmd_t command, bool waitForCompletion){
     // Ensure valid inputs
     if ( !_theBus )
         return false;
@@ -141,6 +162,9 @@ bool sfDevCY8CMBR3::sendCtrlCommand(sfe_cy8cmbr3_ctrl_cmd_t command){
         #endif
         return false;
     }
+
+    if (!waitForCompletion)
+        return true;
 
     // Wait for the command to complete
     while (!isCtrlCommandComplete()){
@@ -357,6 +381,28 @@ bool sfDevCY8CMBR3::defaultMoistureSensorInit(void)
         #endif
         return false;
     }
+
+    if (!setAutoResetEnable()){
+        #if DEBUG_SERIAL_PRINTS
+        Serial.println("Failed to enable auto reset");
+        #endif
+        return false;
+    }
+
+    // Save the configuration to non-volatile memory and reset
+    if (!saveConfig()){
+        #if DEBUG_SERIAL_PRINTS
+        Serial.println("Failed to save configuration");
+        #endif
+        return false;
+    }
+
+    if (!reset()){
+        #if DEBUG_SERIAL_PRINTS
+        Serial.println("Failed to reset device after saving configuration");
+        #endif
+        return false;
+    }
     
     // Ensure GPO0 is not driving the LED
     if (!ledOff(GPO_0)){
@@ -370,13 +416,6 @@ bool sfDevCY8CMBR3::defaultMoistureSensorInit(void)
     if (!setSensorId(SID_0)){
         #if DEBUG_SERIAL_PRINTS
         Serial.println("Failed to set sensor Id to SID_0");
-        #endif
-        return false;
-    }
-
-    if (!setAutoResetEnable()){
-        #if DEBUG_SERIAL_PRINTS
-        Serial.println("Failed to enable auto reset");
         #endif
         return false;
     }
@@ -612,6 +651,32 @@ bool sfDevCY8CMBR3::setBaseThreshold(uint8_t threshold, sfe_cy8cmbr3_sensor_id_t
 
     return true; // Return true to indicate success
 }
+
+uint8_t getBaseThreshold(sfe_cy8cmbr3_sensor_id_t sensorId);
+
+bool setHysteresisOverride(bool override);
+
+bool setHysteresis(uint8_t hysteresis);
+
+uint8_t getHysteresis(void);
+
+bool setLowBaselineResetOverride(bool override = false);
+
+bool setLowBaselineReset(uint8_t baseline);
+
+uint8_t getLowBaselineReset(void);
+
+bool setNegativeNoiseThresholdOverride(bool override = false);
+
+bool setNegativeNoiseThreshold(uint8_t threshold);
+
+uint8_t getNegativeNoiseThreshold(void);
+
+bool setNoiseThresholdOverride(bool override = false);
+
+bool setNoiseThreshold(uint8_t threshold);
+
+uint8_t getNoiseThreshold(void);
 
 bool sfDevCY8CMBR3::setRefreshInterval(sfe_cy8cmbr3_refresh_interval_t interval)
 {
@@ -1035,4 +1100,99 @@ bool sfDevCY8CMBR3::_readWithRetry(uint8_t regAddress, uint16_t &data)
     Serial.println("Read failed after max retries");
     #endif
     return false; // Failed after retries
+}
+
+// ------------------ DEFAULT CONFIGURATION -------------------------
+// Create a default configuration structure that contains the registers and values to write to them to get a default config:
+// This will be an array where each row contains a register address, the number of bytes to write to it, and the corresponding byte(s) to write to that register for it's default state.
+// So it will take the form:
+// {register address, number of bytes to write, byte 0, byte 1 (if applicable)}
+static const uint8_t kDefaultCY8CMBR3Config[][4] = {
+    {ksfCY8CMBR3RegSensorEn, 0x02, 0x03, 0x00},
+    {ksfCY8CMBR3RegFssEn, 0x02, 0x00, 0x00},
+    {ksfCY8CMBR3RegToggleEn, 0x02, 0x00, 0x00},
+    {ksfCY8CMBR3RegSensitivity0, 0x01, 0x00, 0x00},
+    {ksfCY8CMBR3RegBaseThreshold0, 0x01, 0x80, 0x00},
+    {ksfCY8CMBR3RegBaseThreshold1, 0x01, 0x80, 0x00},
+    {ksfCY8CMBR3RegSensorDebounce, 0x01, 0x03, 0x00},
+    {ksfCY8CMBR3RegButtonHys, 0x01, 0x0C, 0x00},
+    {ksfCY8CMBR3RegButtonLbr, 0x01, 0x32, 0x00},
+    {ksfCY8CMBR3RegButtonNnt, 0x01, 0x33, 0x00},
+    {ksfCY8CMBR3RegButtonNt, 0x01, 0x33, 0x00},
+    {ksfCY8CMBR3RegProxEn, 0x01, 0x00, 0x00},
+    {ksfCY8CMBR3RegProxCfg, 0x01, 0x80, 0x00},
+    {ksfCY8CMBR3RegProxCfg2, 0x01, 0x05, 0x00},
+    {ksfCY8CMBR3RegProxTouchTh0, 0x02, 0x00, 0x02}, // 0x0200 = 512
+    {ksfCY8CMBR3RegProxTouchTh1, 0x02, 0x00, 0x02}, // 0x0200 = 512
+    {ksfCY8CMBR3RegProxResolution0, 0x01, 0x00, 0x00},
+    {ksfCY8CMBR3RegProxResolution1, 0x01, 0x00, 0x00},
+    {ksfCY8CMBR3RegProxHys, 0x01, 0x05, 0x00},
+    {ksfCY8CMBR3RegProxLbr, 0x01, 0x32, 0x00},
+    {ksfCY8CMBR3RegProxNnt, 0x01, 0x14, 0x00},
+    {ksfCY8CMBR3RegProxNt, 0x01, 0x14, 0x00},
+    {ksfCY8CMBR3RegProxPositiveTh0, 0x01, 0x1e, 0x00},
+    {ksfCY8CMBR3RegProxPositiveTh1, 0x01, 0x1e, 0x00},
+    {ksfCY8CMBR3RegProxNegativeTh0, 0x01, 0x1e, 0x00},
+    {ksfCY8CMBR3RegProxNegativeTh1, 0x01, 0x1e, 0x00},
+    {ksfCY8CMBR3RegLedOnTime, 0x01, 0x00, 0x00},
+    {ksfCY8CMBR3RegGpoCfg, 0x01, 0x00, 0x00},
+    {ksfCY8CMBR3RegPwmDutyCycleCfg0, 0x01, 0x0F, 0x00},
+    {ksfCY8CMBR3RegSpoCfg, 0x01, 0x01, 0x00}, 
+    {ksfCY8CMBR3RegDeviceCfg0, 0x01, 0x03, 0x00},
+    {ksfCY8CMBR3RegDeviceCfg1, 0x01, 0x01, 0x00},
+    {ksfCY8CMBR3RegDeviceCfg2, 0x01, 0x08, 0x00},
+    {ksfCY8CMBR3RegDeviceCfg3, 0x01, 0x00, 0x00},
+    {ksfCY8CMBR3RegRefreshCtrl, 0x01, 0x06, 0x00},
+    {ksfCY8CMBR3RegStateTimeout, 0x01, 0x0A, 0x00},
+    {ksfCY8CMBR3RegScratchpad0, 0x01, 0x00, 0x00},
+    {ksfCY8CMBR3RegScratchpad1, 0x01, 0x00, 0x00}
+};
+
+bool sfDevCY8CMBR3::checkDefaultConfiguration(void)
+{
+    sfe_cy8cmbr3_reg_system_status_t systemStatus;
+    if (!_readWithRetry(ksfCY8CMBR3RegSystemStatus, systemStatus.byte))
+        return false;
+
+    return (systemStatus.F_DEFAULT == 1);
+}
+
+bool sfDevCY8CMBR3::saveDefaultConfig(void)
+{
+    if (!_theBus)
+        return false;
+
+    for (size_t i = 0; i < sizeof(kDefaultCY8CMBR3Config) / sizeof(kDefaultCY8CMBR3Config[0]); i++)
+    {
+        uint8_t reg = kDefaultCY8CMBR3Config[i][0];
+        uint8_t numBytes = kDefaultCY8CMBR3Config[i][1];
+        uint8_t data0 = kDefaultCY8CMBR3Config[i][2];
+        uint8_t data1 = kDefaultCY8CMBR3Config[i][3];
+
+        if (numBytes == 1) {
+            if (!_writeWithRetry(reg, data0))
+                return false;
+        }
+        else if (numBytes == 2) {
+            uint16_t data = (data1 << 8) | data0;
+            if (!_writeWithRetry(reg, data))
+                return false;
+        }
+        else {
+            // Unsupported number of bytes
+            return false;
+        }
+    }
+
+    // TODO: Maybe remove the below if it seems like it's not needed...
+    // Check the F_DEFAULT bit of the SYSTEM_STATUS reg to check if default config is loaded after reset...
+    
+    if (!reset())
+        return false;
+
+    // This doesn't appear to ever evaluate to true, so we won't use it...
+    // if (!checkDefaultConfiguration())
+    //     return false;
+    
+    return true;
 }

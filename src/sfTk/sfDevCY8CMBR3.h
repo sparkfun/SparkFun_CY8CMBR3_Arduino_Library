@@ -689,6 +689,15 @@ typedef union {
     uint8_t byte;
 } sfe_cy8cmbr3_reg_sync_counter2_t;
 
+// SYSTEM_STATUS: System configuration status indicators
+typedef union {
+    struct {
+        uint8_t F_DEFAULT: 1; // Indicates if default configuration is loaded
+        uint8_t RESERVED: 7;
+    };
+    uint8_t byte;
+} sfe_cy8cmbr3_reg_system_status_t;
+
 ///////////////////////////////////////////////////////////////////////////////
 // Enum Definitions
 //
@@ -832,8 +841,9 @@ class sfDevCY8CMBR3
 
     /// @brief Sends a control command to the sensor.
     /// @param command The control command to send.
+    /// @param waitForCompletion If true, the function will wait until the command is complete before returning.
     /// @return True if successful, false if it fails.
-    bool sendCtrlCommand(sfe_cy8cmbr3_ctrl_cmd_t command);
+    bool sendCtrlCommand(sfe_cy8cmbr3_ctrl_cmd_t command, bool waitForCompletion = true);
 
     /// @brief Save the current configuration to non-volatile memory.
     /// @details This method saves the current configuration to non-volatile memory by sending the SAVE_CONFIG command.
@@ -918,6 +928,84 @@ class sfDevCY8CMBR3
     /// @param sensorId The sensor Id to set the base threshold for.
     /// @return True if successful, false if it fails.
     bool setBaseThreshold(uint8_t threshold = 128, sfe_cy8cmbr3_sensor_id_t sensorId = SID_0);
+
+    /// @brief Get the base threshold for the specified sensor Id
+    /// @details This method gets the base threshold for the specified sensor by reading from the BASE_THRESHOLDx register.
+    /// @param sensorId The sensor Id to get the base threshold for.
+    /// @return The base threshold value for the specified sensor (0-255).
+    uint8_t getBaseThreshold(sfe_cy8cmbr3_sensor_id_t sensorId = SID_0);
+    
+    /// @brief Set the hysteresis override. This allows manual control of the hysteresis value.
+    /// @param override True to enable hysteresis override, false to disable.
+    /// @return True if successful, false if it fails.
+    bool setHysteresisOverride(bool override = false);
+
+    /// @brief Set the hysteresis value.
+    /// @details This method sets the hysteresis value by writing to the BUTTON_HYS register.
+    /// @param hysteresis The hysteresis value to set (0-31).
+    /// @return True if successful, false if it fails.
+    bool setHysteresis(uint8_t hysteresis = 0);
+
+    /// @brief Get the hysteresis value.
+    /// @details This method gets the hysteresis value by reading from the BUTTON_HYS register.
+    /// @return The current hysteresis value (0-31)
+    uint8_t getHysteresis(void);
+
+    /// @brief Set the low baseline reset override. This allows manual control of the low baseline reset.
+    /// @param override True to enable low baseline reset override, false to disable.
+    /// @return True if successful, false if it fails.
+    bool setLowBaselineResetOverride(bool override = false);
+
+    /// @brief Set the low baseline reset value.
+    /// @details This method sets the low baseline reset value by writing to the BUTTON_LBR register.
+    /// @param baseline The low baseline reset value to set (0-127).
+    /// @return True if successful, false if it fails.
+    bool setLowBaselineReset(uint8_t baseline = 0);
+
+    /// @brief Get the low baseline reset value.
+    /// @details This method gets the low baseline reset value by reading from the BUTTON_LBR register.
+    /// @return The current low baseline reset value (0-127).
+    uint8_t getLowBaselineReset(void);
+
+    /// @brief Set the negative noise threshold override. This allows manual control of the negative noise threshold.
+    /// @param override True to enable negative noise threshold override, false to disable.
+    /// @return True if successful, false if it fails.
+    bool setNegativeNoiseThresholdOverride(bool override = false);
+    
+    /// @brief Set the negative noise threshold value.
+    /// @details This method sets the negative noise threshold value by writing to the BUTTON_NNT register.
+    /// @param threshold The negative noise threshold value to set (0-127).
+    /// @return True if successful, false if it fails.
+    bool setNegativeNoiseThreshold(uint8_t threshold = 0);
+
+    /// @brief Get the negative noise threshold value.
+    /// @details This method gets the negative noise threshold value by reading from the BUTTON_NNT register.
+    /// @return The current negative noise threshold value (0-127).
+    uint8_t getNegativeNoiseThreshold(void);
+
+    /// @brief Set the noise threshold override. This allows manual control of the noise threshold.
+    /// @param override True to enable noise threshold override, false to disable.
+    /// @return True if successful, false if it fails.
+    bool setNoiseThresholdOverride(bool override = false);
+
+    /// @brief Set the noise threshold value.
+    /// @details This method sets the noise threshold value by writing to the BUTTON_NT register.
+    /// @param threshold The noise threshold value to set (0-127).
+    /// @return True if successful, false if it fails.
+    bool setNoiseThreshold(uint8_t threshold = 0);
+
+    /// @brief Get the noise threshold value.
+    /// @details This method gets the noise threshold value by reading from the BUTTON_NT register.
+    /// @return The current noise threshold value (0-127).
+    uint8_t getNoiseThreshold(void);
+
+    /// @brief Check if the current configuration matches the default configuration.
+    /// @return True if the current configuration matches the default configuration, false otherwise.
+    bool checkDefaultConfiguration(void);
+
+    /// @brief Load the default configuration and save it to non-volatile memory.
+    /// @return True if successful, false if it fails.
+    bool saveDefaultConfig(void);
 
     /// @brief Set the GPO configuration.
     /// @details This method sets the GPO configuration by writing to the GPO_CFG register.

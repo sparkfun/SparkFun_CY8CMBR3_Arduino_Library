@@ -21,7 +21,7 @@
 
 SfeCY8CMBR3ArdI2C mySensor;
 // Capacitance threshold for LED control. If the capacitance is below this value, turn on the LED.
-uint16_t threshold = 3500; 
+uint8_t threshold = 13; 
 
 void setup()
 {
@@ -43,93 +43,38 @@ void setup()
         Serial.println("Halting...");
         while (1); // Enter infinite loop if we reach this failure
     }
-
-    // mySensor.ledOn(false);
-    // Serial.print("LedOn(true);");
-    // while(1){}
 }
 
 void loop()
 {   
-    mySensor.ledOn(false);
-    Serial.println("LED OFF");
-    uint8_t gpo_cfg = mySensor.getGPOConfig().byte;
-    Serial.print("Read GPO Cfg: ");
-    Serial.println(gpo_cfg);
+    // Read capacitance in pF
+    uint16_t capacitance = mySensor.readCapacitancePF();
 
-    uint8_t gpo_output_state = mySensor.getGPOOutputState();
-    Serial.print("Read GPO Output States: ");
-    Serial.println(gpo_output_state);
+    if (capacitance == 0)
+    {
+        Serial.println("Failed to read capacitance or capacitance is 0.");
+    }
+    else
+    {
+        Serial.print("Capacitance Reading: ");
+        Serial.print(capacitance);
+        Serial.println(" pF");
+    }
 
-    uint8_t gpo_data = mySensor.getGPOData();
-    Serial.print("Read GPO Data: ");
-    Serial.println(gpo_data);
-
-    Serial.println();
-    Serial.println("-------------------------------");
-    Serial.println();
-
-    delay(250);
-    mySensor.ledOn(true);
-
-    Serial.println("LED ON");
-    gpo_cfg = mySensor.getGPOConfig().byte;
-    Serial.print("Read GPO Cfg: ");
-    Serial.println(gpo_cfg);
-
-    gpo_output_state = mySensor.getGPOOutputState();
-    Serial.print("Read GPO Output States: ");
-    Serial.println(gpo_output_state);
-
-    gpo_data = mySensor.getGPOData();
-    Serial.print("Read GPO Data: ");
-    Serial.println(gpo_data);
+    if (capacitance < threshold)
+    {
+        mySensor.ledOn();
+        Serial.println("LED ON - Soil moisture is below threshold.");
+    }
+    else 
+    {
+        mySensor.ledOff();
+        Serial.println("LED OFF - Soil moisture is above threshold.");
+    }
 
     Serial.println();
     Serial.println("-------------------------------");
     Serial.println();
 
-    delay(1000);
-    // // Read capacitance in pF
-    // uint16_t capacitance = mySensor.readRawCount();
-
-    // if (capacitance == 0)
-    // {
-    //     Serial.println("Failed to read capacitance.");
-    // }
-    // else
-    // {
-    //     Serial.print("Raw Capacitance Reading: ");
-    //     Serial.print(capacitance);
-    //     Serial.println(" counts");
-    // }
-
-    // if (capacitance < threshold)
-    // {
-    //     mySensor.ledOn();
-    //     Serial.println("LED ON - Soil moisture is below threshold.");
-    // }
-    // else 
-    // {
-    //     mySensor.ledOff();
-    //     Serial.println("LED OFF - Soil moisture is above threshold.");
-    // }
-
-    // uint8_t gpo_cfg = mySensor.getGPOConfig().byte;
-    // Serial.print("Read GPO Cfg: ");
-    // Serial.println(gpo_cfg);
-
-    // uint8_t gpo_output_state = mySensor.getGPOOutputState();
-    // Serial.print("Read GPO Output States: ");
-    // Serial.println(gpo_output_state);
-
-    // uint8_t gpo_data = mySensor.getGPOData();
-    // Serial.print("Read GPO Data: ");
-    // Serial.println(gpo_data);
-
-    // Serial.println();
-    // Serial.println("-------------------------------");
-    // Serial.println();
-
-    // delay(500);
+    delay(500);
 }

@@ -90,7 +90,6 @@ void setup()
     //   while(1){}
     // }
 
-
     // Initialize as a moisture sensor (with default settings)
     if (!mySensor.defaultMoistureSensorInit())
     {
@@ -99,12 +98,36 @@ void setup()
         while (1); // Enter infinite loop if we reach this failure
     }
 
-    // if (!mySensor.setAutoResetEnable())
-    // {
-    //   Serial.println("Failed Auto Reset Enable!");
-    //   Serial.println("Halting...");
-    //   while (1); // Enter infinite loop if we reach this failure
-    // }
+    if (!mySensor.setSensitivity(CS_SENSITIVITY_125_COUNTS_PER_PF)){
+      Serial.println("Failed to set sensitivity...");
+      while(1){}
+    }
+
+    if (!mySensor.setAutoThresholdEnable(false)){
+      Serial.println("Failed to disable autothreshold...");
+      while(1){}
+    }
+    else{
+      Serial.println("Successfully disabled autothreshold...");
+    }
+
+    if (!mySensor.setBaseThreshold(0xFF)){
+      Serial.println("Failed to set base threshold...");
+      while(1){}
+    }
+
+    if (!mySensor.saveConfig()){
+        Serial.println("Failed to save configuration. Please check your wiring!");
+        Serial.println("Halting...");
+        while (1); // Enter infinite loop if we reach this failure
+    }
+
+    if (!mySensor.reset()){
+        Serial.println("Failed to reset device after saving configuration. Please check your wiring!");
+        Serial.println("Halting...");
+        while (1); // Enter infinite loop if we reach this failure
+    }
+
 }
 
 void loop()
@@ -114,7 +137,7 @@ void loop()
     // most useful (balancing accuracy, range, and resolution).
     
     // Read raw count data (For some reason, it is getting capped at 4094)
-    uint16_t rawCounts = mySensor.readRawCount(SID_0);
+    uint16_t rawCounts = mySensor.readRawCount();
     // if (rawCounts == 0)
     // {
     //     Serial.println("Failed to read raw counts.");
@@ -179,7 +202,7 @@ void loop()
     // }
 
     // // Read debug capacitance in pF
-    uint8_t capacitancePF = mySensor.readCapacitancePF(SID_0);
+    uint8_t capacitancePF = mySensor.readCapacitancePF();
     if (capacitancePF == 0)
     {
         Serial.println("Failed to read capacitance.");
@@ -192,9 +215,6 @@ void loop()
         // Serial.print("Hex: 0x");
         // Serial.println(capacitancePF, HEX);
     }
-    uint8_t sensorID = mySensor.getDebugSensorId();
-    Serial.print("Sensor ID: ");
-    Serial.println(sensorID);
 
     Serial.println();
     Serial.println("----------------------------------");
