@@ -47,19 +47,17 @@ void setup()
 
 void loop()
 {   
-    // Read capacitance in pF
+    // Read capacitance in pF and counts
     uint16_t capacitance = mySensor.readCapacitancePF();
+    uint16_t rawCounts = mySensor.readRawCount();
+    
+    Serial.print("Capacitance Reading: ");
+    Serial.print(capacitance);
+    Serial.println(" pF");
 
-    if (capacitance == 0)
-    {
-        Serial.println("Failed to read capacitance or capacitance is 0.");
-    }
-    else
-    {
-        Serial.print("Capacitance Reading: ");
-        Serial.print(capacitance);
-        Serial.println(" pF");
-    }
+    Serial.print("Raw Count Reading: ");
+    Serial.println(rawCounts);
+    Serial.println();
 
     if (capacitance < threshold)
     {

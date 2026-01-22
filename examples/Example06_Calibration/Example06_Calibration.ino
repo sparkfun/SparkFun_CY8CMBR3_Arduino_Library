@@ -89,14 +89,6 @@ void loop()
         mySensor.ledOff();
       }
     }
-
-    // TODO: Maybe spit out finger threshold, noise threshold, negative noise threshold, hysteresis and LBR here
-    // and then user can save them and manually set them later and override them.
-    // Could even make a menu with:
-       // 1 - Recalibrate
-       // 2 - Save current calibration to non-volatile memory
-       // 3 - Display current calibration values
-       // 4 - Restore default calibration (auto thresholds based on sensitivity)
     
     // Read raw count data (if it is getting capped at a maximum value, then consider recalibrating...)
     uint16_t rawCounts = mySensor.readRawCount();

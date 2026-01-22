@@ -438,8 +438,14 @@ bool sfDevCY8CMBR3::setSensorId(sfe_cy8cmbr3_sensor_id_t sensorId)
 
     _currentSensorId = sensorId;
 
-    while (getDebugSensorId() != sensorId){
+    sfe_cy8cmbr3_sensor_id_t debugSensorId = getDebugSensorId();
+    while (debugSensorId != sensorId){
         // Wait until the sensor ID is updated
+        Serial.print("Waiting for debug sensor ID to update to ");
+        Serial.println((uint8_t)sensorId);
+        Serial.print("Current debug sensor ID: ");
+        Serial.println((uint8_t)debugSensorId);
+        debugSensorId = getDebugSensorId();
     }
 
     return true; // Return true to indicate success
@@ -653,31 +659,303 @@ bool sfDevCY8CMBR3::setBaseThreshold(uint8_t threshold, sfe_cy8cmbr3_sensor_id_t
     return true; // Return true to indicate success
 }
 
-uint8_t getBaseThreshold(sfe_cy8cmbr3_sensor_id_t sensorId);
+uint8_t sfDevCY8CMBR3::getBaseThreshold(sfe_cy8cmbr3_sensor_id_t sensorId){
+    // Ensure valid inputs
+    if (    (!_theBus) 
+            ||  (sensorId < SID_0) || (sensorId > SID_15) 
+        )
+        return 0;
+    
+    // Calculate the register address for the specified sensorId
+    uint8_t regAddress = ksfCY8CMBR3RegBaseThreshold0 + sensorId;
 
-bool setHysteresisOverride(bool override);
+    uint8_t threshold = 0;
+    if (!_readWithRetry(regAddress, threshold))
+        return 0;
 
-bool setHysteresis(uint8_t hysteresis);
+    return threshold;
+}
 
-uint8_t getHysteresis(void);
+bool sfDevCY8CMBR3::setHysteresisOverride(bool override){
+    // Ensure valid inputs
+    if ( !_theBus )
+        return false;
+    
+    sfe_cy8cmbr3_reg_button_hys_t regValue = {0}; // Create a register structure to hold the current register value
 
-bool setLowBaselineResetOverride(bool override = false);
+    // Read the current register value to retain other bits
+    if (!_readWithRetry(ksfCY8CMBR3RegButtonHys, regValue.byte))
+        return false;
 
-bool setLowBaselineReset(uint8_t baseline);
+    regValue.OVERRIDE = override ? 1 : 0; // Set or clear the OVERRIDE bit
 
-uint8_t getLowBaselineReset(void);
+    // Write the updated register value back to the device
+    if (!_writeWithRetry(ksfCY8CMBR3RegButtonHys, regValue.byte))
+        return false;
 
-bool setNegativeNoiseThresholdOverride(bool override = false);
+    return true; // Return true to indicate success
+}
 
-bool setNegativeNoiseThreshold(uint8_t threshold);
+bool sfDevCY8CMBR3::setHysteresis(uint8_t hysteresis){
+    // Ensure valid inputs
+    if ( !_theBus || (hysteresis > 31) ){
+        return false;
+    }
 
-uint8_t getNegativeNoiseThreshold(void);
+    sfe_cy8cmbr3_reg_button_hys_t regValue = {0}; // Create a register structure to hold the current register value
 
-bool setNoiseThresholdOverride(bool override = false);
+    // Read the current register value to retain other bits
+    if (!_readWithRetry(ksfCY8CMBR3RegButtonHys, regValue.byte))
+        return false;
 
-bool setNoiseThreshold(uint8_t threshold);
+    // To update the hysteresis, the override must be set. You can turn off later using setHysteresisOverride(false)
+    regValue.OVERRIDE = 1;
+    regValue.BUTTON_HYSTERESIS = hysteresis; // Set the HYS bits to the specified hysteresis value
 
-uint8_t getNoiseThreshold(void);
+    // Write the updated register value back to the device
+    if (!_writeWithRetry(ksfCY8CMBR3RegButtonHys, regValue.byte))
+        return false;
+
+    return true; // Return true to indicate success
+}
+
+uint8_t sfDevCY8CMBR3::getHysteresis(void){
+    if ( !_theBus )
+        return 0;
+
+    sfe_cy8cmbr3_reg_button_hys_t regValue = {0};
+    if (!_readWithRetry(ksfCY8CMBR3RegButtonHys, regValue.byte))
+        return 0;
+    
+    return regValue.BUTTON_HYSTERESIS;
+}
+
+bool sfDevCY8CMBR3::setLowBaselineResetOverride(bool override){
+    // Ensure valid inputs
+    if ( !_theBus )
+        return false;
+    
+    sfe_cy8cmbr3_reg_button_lbr_t regValue = {0}; // Create a register structure to hold the current register value
+
+    // Read the current register value to retain other bits
+    if (!_readWithRetry(ksfCY8CMBR3RegButtonLbr, regValue.byte))
+        return false;
+    
+    regValue.OVERRIDE = override ? 1 : 0; // Set or clear the OVERRIDE bit
+
+    // Write the updated register value back to the device
+    if (!_writeWithRetry(ksfCY8CMBR3RegButtonLbr, regValue.byte))
+        return false;
+    
+    return true; // Return true to indicate success
+}
+
+bool sfDevCY8CMBR3::setLowBaselineReset(uint8_t baseline)
+{
+    // Ensure valid inputs
+    if ( !_theBus || (baseline > 127) )
+        return false;
+
+    sfe_cy8cmbr3_reg_button_lbr_t regValue = {0}; // Create a register structure to hold the current register value
+
+    // Read the current register value to retain other bits
+    if (!_readWithRetry(ksfCY8CMBR3RegButtonLbr, regValue.byte))
+        return false;
+
+    // To update the low baseline reset, the override must be set. You can turn off later using setLowBaselineResetOverride(false)
+    regValue.OVERRIDE = 1;
+    regValue.LOW_BASELINE_RESET_THRESHOLD = baseline; // Set the LOW_BASELINE_RESET bits to the specified baseline value
+
+    // Write the updated register value back to the device
+    if (!_writeWithRetry(ksfCY8CMBR3RegButtonLbr, regValue.byte))
+        return false;
+
+    return true; // Return true to indicate success
+}
+
+uint8_t sfDevCY8CMBR3::getLowBaselineReset(void){
+    if ( !_theBus )
+        return 0;
+
+    sfe_cy8cmbr3_reg_button_lbr_t regValue = {0};
+    if (!_readWithRetry(ksfCY8CMBR3RegButtonLbr, regValue.byte))
+        return 0;
+    
+    return regValue.LOW_BASELINE_RESET_THRESHOLD;
+}
+
+bool sfDevCY8CMBR3::setNegativeNoiseThresholdOverride(bool override){
+    if ( !_theBus )
+        return false;
+
+    sfe_cy8cmbr3_reg_button_nnt_t regValue = {0}; // Create a register structure to hold the current register value
+
+    // Read the current register value to retain other bits
+    if (!_readWithRetry(ksfCY8CMBR3RegButtonNnt, regValue.byte))
+        return false;
+
+    regValue.OVERRIDE = override ? 1 : 0; // Set or clear the OVERRIDE bit
+
+    // Write the updated register value back to the device
+    if (!_writeWithRetry(ksfCY8CMBR3RegButtonNnt, regValue.byte))
+        return false;
+
+    return true; // Return true to indicate success
+}
+
+bool sfDevCY8CMBR3::setNegativeNoiseThreshold(uint8_t threshold)
+{
+    // Ensure valid inputs
+    if ( !_theBus || (threshold > 127) )
+        return false;
+
+    sfe_cy8cmbr3_reg_button_nnt_t regValue = {0}; // Create a register structure to hold the current register value
+
+    // Read the current register value to retain other bits
+    if (!_readWithRetry(ksfCY8CMBR3RegButtonNnt, regValue.byte))
+        return false;
+
+    regValue.OVERRIDE = 1; // To update the negative noise threshold, the override must be set. You can turn off later using setNegativeNoiseThresholdOverride(false)
+    regValue.NEGATIVE_NOISE_THRESHOLD = threshold; // Set the NEGATIVE_NOISE_THRESHOLD bits to the specified threshold value
+
+    // Write the updated register value back to the device
+    if (!_writeWithRetry(ksfCY8CMBR3RegButtonNnt, regValue.byte))
+        return false;
+
+    return true; // Return true to indicate success
+}
+
+uint8_t sfDevCY8CMBR3::getNegativeNoiseThreshold(void){
+    if ( !_theBus )
+        return 0;
+
+    sfe_cy8cmbr3_reg_button_nnt_t regValue = {0};
+    if (!_readWithRetry(ksfCY8CMBR3RegButtonNnt, regValue.byte))
+        return 0;
+    
+    return regValue.NEGATIVE_NOISE_THRESHOLD;
+}
+
+bool sfDevCY8CMBR3::setNoiseThresholdOverride(bool override)
+{
+    if ( !_theBus )
+        return false;
+
+    sfe_cy8cmbr3_reg_button_nnt_t regValue = {0}; // Create a register structure to hold the current register value
+
+    // Read the current register value to retain other bits
+    if (!_readWithRetry(ksfCY8CMBR3RegButtonNnt, regValue.byte))
+        return false;
+
+    regValue.OVERRIDE = override ? 1 : 0; // Set or clear the OVERRIDE bit
+
+    // Write the updated register value back to the device
+    if (!_writeWithRetry(ksfCY8CMBR3RegButtonNnt, regValue.byte))
+        return false;
+
+    return true; // Return true to indicate success
+}
+
+bool sfDevCY8CMBR3::setNoiseThreshold(uint8_t threshold)
+{
+    // Ensure valid inputs
+    if ( !_theBus || (threshold > 127) )
+        return false;
+
+    sfe_cy8cmbr3_reg_button_nnt_t regValue = {0}; // Create a register structure to hold the current register value
+
+    // Read the current register value to retain other bits
+    if (!_readWithRetry(ksfCY8CMBR3RegButtonNnt, regValue.byte))
+        return false;
+
+    regValue.OVERRIDE = 1; // To update the negative noise threshold, the override must be set. You can turn off later using setNegativeNoiseThresholdOverride(false)
+    regValue.NEGATIVE_NOISE_THRESHOLD = threshold; // Set the NEGATIVE_NOISE_THRESHOLD bits to the specified threshold value
+
+    // Write the updated register value back to the device
+    if (!_writeWithRetry(ksfCY8CMBR3RegButtonNnt, regValue.byte))
+        return false;
+
+    return true; // Return true to indicate success
+}
+
+uint8_t sfDevCY8CMBR3::getNoiseThreshold(void){
+    if ( !_theBus )
+        return 0;
+
+    sfe_cy8cmbr3_reg_button_nnt_t regValue = {0};
+    if (!_readWithRetry(ksfCY8CMBR3RegButtonNnt, regValue.byte))
+        return 0;
+    
+    return regValue.NEGATIVE_NOISE_THRESHOLD;
+}
+
+void sfDevCY8CMBR3::printOverrides(void){
+    if ( !_theBus ){
+        Serial.println("Device not initialized");
+        return;
+    }
+
+    // Read the 3 overrides as well as auto threshold enable
+    sfe_cy8cmbr3_reg_device_cfg2_t cfgReg = {0};
+    sfe_cy8cmbr3_reg_button_hys_t hysReg = {0};
+    sfe_cy8cmbr3_reg_button_lbr_t lbrReg = {0};
+    sfe_cy8cmbr3_reg_button_nnt_t nntReg = {0};
+
+
+    if (!_readWithRetry(ksfCY8CMBR3RegDeviceCfg2, cfgReg.byte))
+        return;
+    if (!_readWithRetry(ksfCY8CMBR3RegButtonHys, hysReg.byte)){
+        Serial.println("Error reading HYS register");
+        return;
+    }
+    if (!_readWithRetry(ksfCY8CMBR3RegButtonLbr, lbrReg.byte)){
+        Serial.println("Error reading LBR register");
+        return;
+    }
+    if (!_readWithRetry(ksfCY8CMBR3RegButtonNnt, nntReg.byte)){
+        Serial.println("Error reading NNT register");
+        return;
+    }
+
+    Serial.print("Auto Threshold Enable: ");
+    Serial.println(cfgReg.ATH_EN ? "Enabled" : "Disabled");
+    Serial.print("HYS Override: ");
+    Serial.println(hysReg.OVERRIDE ? "Enabled" : "Disabled");
+    Serial.print("LBR Override: ");
+    Serial.println(lbrReg.OVERRIDE ? "Enabled" : "Disabled");
+    Serial.print("NNT Override: ");
+    Serial.println(nntReg.OVERRIDE ? "Enabled" : "Disabled");
+}
+
+bool sfDevCY8CMBR3::setCalibrationByCount(uint8_t count) {
+    // From AN90071 - CAPSENSE MBR3 Design Guide Page 88 Table 6-2:
+    // Finger/Baseline Threshold = 80% of Count
+    // Noise Threshold = 40% of Count
+    // Negative Noise Threshold = 40% of Count
+    // Hysteresis = 10% of Count
+    // Low Baseline Reset = 50 counts
+
+    // Please excuse my overcasting...
+    uint16_t fingerBaselineThreshold = (uint16_t)(((uint16_t)count * (uint16_t)80) / (uint16_t)100);
+    uint16_t noiseThreshold = (uint16_t)(((uint16_t)count * (uint16_t)40) / (uint16_t)100);
+    uint16_t negativeNoiseThreshold = (uint16_t)(((uint16_t)count * (uint16_t)40) / (uint16_t)100);
+    uint16_t hysteresis = (uint16_t)(((uint16_t)count * (uint16_t)10) / (uint16_t)100);
+    uint16_t lowBaselineReset = 50;
+
+    // Write out the calibration values
+    if (!setBaseThreshold((uint8_t)fingerBaselineThreshold))
+        return false;
+    if (!setNoiseThreshold((uint8_t)noiseThreshold))
+        return false;
+    if (!setNegativeNoiseThreshold((uint8_t)negativeNoiseThreshold))
+        return false;
+    if (!setHysteresis((uint8_t)hysteresis))
+        return false;
+    if (!setLowBaselineReset((uint8_t)lowBaselineReset))
+        return false;
+
+    return true;
+}
 
 bool sfDevCY8CMBR3::setRefreshInterval(sfe_cy8cmbr3_refresh_interval_t interval)
 {

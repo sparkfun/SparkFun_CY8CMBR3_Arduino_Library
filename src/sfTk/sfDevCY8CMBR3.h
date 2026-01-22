@@ -273,6 +273,16 @@ typedef union {
     uint8_t byte;
 } sfe_cy8cmbr3_reg_finger_threshold_t;
 
+// BUTTON_HYS: Button hysteresis
+typedef union {
+    struct {
+        uint8_t BUTTON_HYSTERESIS: 5;
+        uint8_t RESERVED: 2;
+        uint8_t OVERRIDE: 1;
+    };
+    uint8_t byte;
+} sfe_cy8cmbr3_reg_button_hys_t;
+
 // BUTTON_LBR: Button low baseline reset
 typedef union {
     struct {
@@ -1000,6 +1010,13 @@ class sfDevCY8CMBR3
     /// @return The current noise threshold value (0-127).
     uint8_t getNoiseThreshold(void);
 
+    /// @brief Set all the calibration parameters based on a count value.
+    /// @param count The count value to use for calibration (default is 128).
+    /// @return True if successful, false if it fails.
+    bool setCalibrationByCount(uint8_t count = 128);
+
+    void printOverrides(void);
+
     /// @brief Check if the current configuration matches the default configuration.
     /// @return True if the current configuration matches the default configuration, false otherwise.
     bool checkDefaultConfiguration(void);
@@ -1078,8 +1095,7 @@ class sfDevCY8CMBR3
     uint16_t readRawCount(sfe_cy8cmbr3_sensor_id_t sensorId = SID_0);
 
     /// @brief Turn on or off the LED.
-    /// @details This method turns on or off the LED by setting or clearing the
-    /// LED_ACT bit in the LED register (ksfAS7343RegLed).
+    /// @details This method turns on or off the LED by setting or clearing the GPO output state.
     /// @param ledOn True to turn on the LED, false to turn off.
     /// @return True if successful, false if it fails.
     bool ledOn(bool ledOn = true, sfe_cy8cmbr3_gpo_t gpo = GPO_0);

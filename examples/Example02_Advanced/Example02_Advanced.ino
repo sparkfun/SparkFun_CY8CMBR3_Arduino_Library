@@ -47,72 +47,17 @@ void setup()
     // CS_SENSITIVITY_250_COUNTS_PER_PF
     // CS_SENSITIVITY_167_COUNTS_PER_PF
     // CS_SENSITIVITY_125_COUNTS_PER_PF
-    // mySensor.setSensitivity(CS_SENSITIVITY_500_COUNTS_PER_PF); 
-    // if (!mySensor.setSensitivity(CS_SENSITIVITY_500_COUNTS_PER_PF)){
-    //   Serial.println("Failed to set sensitivity...");
-    //   while(1){}
-    // }
-
-    // TODO: remove below test for final version
-    // sfe_cy8cmbr3_sensitivity_t sens = mySensor.getSensitivity();
-    // Serial.print("Sens: ");
-    // Serial.println(sens);
-    //while(1){}
-
-    // Set refresh interval
-    // Options range from REFRESH_INTERVAL_20MS to REFRESH_INTERVAL_500MS
-    // in 20ms increments. See sfe_cy8cmbr3_refresh_interval_t enum in sfDevCY8CMBR3.h for all options.
-    // if (!mySensor.setRefreshInterval(REFRESH_INTERVAL_20MS)){
-    //   Serial.println("Failed to set refresh interval...");
-    //   while(1){}
-    // }
-
-    // if (!mySensor.setAutoThresholdEnable(false)){
-    //   Serial.println("Failed to disable autothreshold...");
-    //   while(1){}
-    // }
-    // else{
-    //   Serial.println("Successfully disabled autothreshold...");
-    // }
-
-    // if (!mySensor.setBaseThreshold(0xFF)){
-    //   Serial.println("Failed to set base threshold...");
-    //   while(1){}
-    // }
-
-    // if (!mySensor.setProxEnable(true)){
-    //   Serial.println("Failed to set proximity enable...");
-    //   while(1){}
-    // }
-    
-    // if (!mySensor.setSystemDiagnosticsEnable(true)){
-    //   Serial.println("Failed to set system diagnostics enable...");
-    //   while(1){}
-    // }
-
-    // Initialize as a moisture sensor (with default settings)
-    if (!mySensor.defaultMoistureSensorInit())
-    {
-        Serial.println("Sensor failed to initialize. Please check your wiring!");
-        Serial.println("Halting...");
-        while (1); // Enter infinite loop if we reach this failure
-    }
-
-    if (!mySensor.setSensitivity(CS_SENSITIVITY_125_COUNTS_PER_PF)){
+    mySensor.setSensitivity(CS_SENSITIVITY_500_COUNTS_PER_PF); 
+    if (!mySensor.setSensitivity(CS_SENSITIVITY_500_COUNTS_PER_PF)){
       Serial.println("Failed to set sensitivity...");
       while(1){}
     }
 
-    if (!mySensor.setAutoThresholdEnable(false)){
-      Serial.println("Failed to disable autothreshold...");
-      while(1){}
-    }
-    else{
-      Serial.println("Successfully disabled autothreshold...");
-    }
-
-    if (!mySensor.setBaseThreshold(0xFF)){
-      Serial.println("Failed to set base threshold...");
+    // Set refresh interval
+    // Options range from REFRESH_INTERVAL_20MS to REFRESH_INTERVAL_500MS
+    // in 20ms increments. See sfe_cy8cmbr3_refresh_interval_t enum in sfDevCY8CMBR3.h for all options.
+    if (!mySensor.setRefreshInterval(REFRESH_INTERVAL_20MS)){
+      Serial.println("Failed to set refresh interval...");
       while(1){}
     }
 
@@ -132,31 +77,29 @@ void setup()
 
 void loop()
 {   
-    // Depending on your application, you may want to tune sensitity and refresh interval
-    // and you may find any of the following different ways of reading the capacitance counts
-    // most useful (balancing accuracy, range, and resolution).
-    
-    // Read raw count data (For some reason, it is getting capped at 4094)
+    // Read debug capacitance in pF
+    uint8_t capacitancePF = mySensor.readCapacitancePF();
+
+    Serial.print("\"Debug\" Capacitance: ");
+    Serial.print(capacitancePF);
+
+    // Read raw count data 
+    // The range of this is set up automatically by the "SmartSense" algorithm in the CY8CMBR3 
+    // based on capacitance it senses at start up. So, for best results, ensure the sensor is in
+    // the wettest condition you expect when you power on so it can set the range accordingly.
+    // For more details, see the calibration example 
     uint16_t rawCounts = mySensor.readRawCount();
-    // if (rawCounts == 0)
-    // {
-    //     Serial.println("Failed to read raw counts.");
-    // }
-    // else
-    // {
-      Serial.print("Raw Counts: ");
-      Serial.println(rawCounts);
+    Serial.print("Raw Counts: ");
+    Serial.println(rawCounts);
 
-      // Serial.print("Raw Counts (HEX): 0x");
-      // Serial.println(rawCounts, HEX);
-    // }
-
-    // Since most capaictive sensors are used with touch sensors to detect when 
+    // Since most capacitive sensors are used with touch sensors to detect when 
     // a button or pad is being touched, they often use a baseline and differential 
     // count method to improve sensitivity and noise immunity.
 
     // The baseline count is the "no touch" reading and the differential count is the
-    // difference between the current reading and the baseline.
+    // difference between the current reading and the baseline. If the differential 
+    // count exceeds a certain threshold, the baseline is adjusted 
+
     // For moisture sensing however, we probably care more about absolute capacitance
     // this can be read from raw counts or pF directly as shown above.
     
@@ -167,54 +110,21 @@ void loop()
 
     // Read base count data
     uint16_t baseCounts = mySensor.readBaselineCount();
-    // if (baseCounts == 0)
-    // {
-    //     Serial.println("Failed to read base counts.");
-    // }
-    // else
-    // {
-        Serial.print("Base Counts: ");
-        Serial.println(baseCounts);
-    // }
+
+    Serial.print("Base Counts: ");
+    Serial.println(baseCounts);
 
     // Read differential count data
     uint16_t diffCounts = mySensor.readDifferenceCount();
-    // if (diffCounts == 0)
-    // {
-    //     Serial.println("Failed to read differential counts.");
-    // }
-    // else
-    // {
-        Serial.print("Differential Counts: ");
-        Serial.println(diffCounts);
-    // }
+
+    Serial.print("Differential Counts: ");
+    Serial.println(diffCounts);
 
     // Read debug differential count data
     diffCounts = mySensor.readDebugDifferenceCount();
-    // if (diffCounts == 0)
-    // {
-    //     Serial.println("Failed to read differential counts.");
-    // }
-    // else
-    // {
-        Serial.print("Debug Differential Counts: ");
-        Serial.println(diffCounts);
-    // }
 
-    // // Read debug capacitance in pF
-    uint8_t capacitancePF = mySensor.readCapacitancePF();
-    if (capacitancePF == 0)
-    {
-        Serial.println("Failed to read capacitance.");
-    }
-    else
-    {
-        Serial.print("\"Debug\" Capacitance: ");
-        Serial.print(capacitancePF);
-        Serial.println(" pF");
-        // Serial.print("Hex: 0x");
-        // Serial.println(capacitancePF, HEX);
-    }
+    Serial.print("Debug Differential Counts: ");
+    Serial.println(diffCounts);
 
     Serial.println();
     Serial.println("----------------------------------");
