@@ -1,7 +1,7 @@
 TODO: Update with actual photo
 ![SparkFun Capacitive Soil Moisture Sensor (CY8CMBR3102) Arduino Library](docs/images/AS7343_Arduino_Banner.png "SparkFun Capacitive Soil Moisture Sensor (CY8CMBR3102) Arduino Library]")
 
-# SparkFun Spectral Sensor AS7343 Arduino Library
+# SparkFun Capacitive Soil Moisture Sensor - CY8CMBR3 Arduino Library
 
 TODO: update links
 Arduino Library for the SparkFun Capacitive Soil Moisture Sensor
