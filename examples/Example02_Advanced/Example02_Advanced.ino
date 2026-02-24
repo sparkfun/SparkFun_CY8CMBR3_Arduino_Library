@@ -87,7 +87,7 @@ void loop()
     // The range of this is set up automatically by the "SmartSense" algorithm in the CY8CMBR3 
     // based on capacitance it senses at start up. So, for best results, ensure the sensor is in
     // the wettest condition you expect when you power on so it can set the range accordingly.
-    // For more details, see the calibration example 
+    // For more details, see the set range example 
     uint16_t rawCounts = mySensor.readRawCount();
     Serial.print("Raw Counts: ");
     Serial.println(rawCounts);

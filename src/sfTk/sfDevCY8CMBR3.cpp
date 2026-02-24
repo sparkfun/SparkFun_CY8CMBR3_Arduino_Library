@@ -28,11 +28,9 @@
 #include "sfDevCY8CMBR3.h"
 
 #define DEBUG_SERIAL_PRINTS (0)
-
-// #if DEBUG_SERIAL_PRINTS
-// TODO: REMOVE THIS BEFORE FINAL RELEASE
+#if DEBUG_SERIAL_PRINTS
 #include "Arduino.h" 
-// #endif
+#endif
 
 bool sfDevCY8CMBR3::begin(sfTkIBus *theBus)
 {
@@ -443,10 +441,6 @@ bool sfDevCY8CMBR3::setSensorId(sfe_cy8cmbr3_sensor_id_t sensorId)
     sfe_cy8cmbr3_sensor_id_t debugSensorId = getDebugSensorId();
     while (debugSensorId != sensorId){
         // Wait until the sensor ID is updated
-        // Serial.print("Waiting for debug sensor ID to update to ");
-        // Serial.println((uint8_t)sensorId);
-        // Serial.print("Current debug sensor ID: ");
-        // Serial.println((uint8_t)debugSensorId);
         debugSensorId = getDebugSensorId();
     }
 
@@ -891,74 +885,6 @@ uint8_t sfDevCY8CMBR3::getNoiseThreshold(void){
     return regValue.NEGATIVE_NOISE_THRESHOLD;
 }
 
-void sfDevCY8CMBR3::printOverrides(void){
-    if ( !_theBus ){
-        Serial.println("Device not initialized");
-        return;
-    }
-
-    // Read the 3 overrides as well as auto threshold enable
-    sfe_cy8cmbr3_reg_device_cfg2_t cfgReg = {0};
-    sfe_cy8cmbr3_reg_button_hys_t hysReg = {0};
-    sfe_cy8cmbr3_reg_button_lbr_t lbrReg = {0};
-    sfe_cy8cmbr3_reg_button_nnt_t nntReg = {0};
-
-
-    if (!_readWithRetry(ksfCY8CMBR3RegDeviceCfg2, cfgReg.byte))
-        return;
-    if (!_readWithRetry(ksfCY8CMBR3RegButtonHys, hysReg.byte)){
-        Serial.println("Error reading HYS register");
-        return;
-    }
-    if (!_readWithRetry(ksfCY8CMBR3RegButtonLbr, lbrReg.byte)){
-        Serial.println("Error reading LBR register");
-        return;
-    }
-    if (!_readWithRetry(ksfCY8CMBR3RegButtonNnt, nntReg.byte)){
-        Serial.println("Error reading NNT register");
-        return;
-    }
-
-    Serial.print("Auto Threshold Enable: ");
-    Serial.println(cfgReg.ATH_EN ? "Enabled" : "Disabled");
-    Serial.print("HYS Override: ");
-    Serial.println(hysReg.OVERRIDE ? "Enabled" : "Disabled");
-    Serial.print("LBR Override: ");
-    Serial.println(lbrReg.OVERRIDE ? "Enabled" : "Disabled");
-    Serial.print("NNT Override: ");
-    Serial.println(nntReg.OVERRIDE ? "Enabled" : "Disabled");
-}
-
-bool sfDevCY8CMBR3::setCalibrationByCount(uint8_t count) {
-    // From AN90071 - CAPSENSE MBR3 Design Guide Page 88 Table 6-2:
-    // Finger/Baseline Threshold = 80% of Count
-    // Noise Threshold = 40% of Count
-    // Negative Noise Threshold = 40% of Count
-    // Hysteresis = 10% of Count
-    // Low Baseline Reset = 50 counts
-
-    // Please excuse my overcasting...
-    uint16_t fingerBaselineThreshold = (uint16_t)(((uint16_t)count * (uint16_t)80) / (uint16_t)100);
-    uint16_t noiseThreshold = (uint16_t)(((uint16_t)count * (uint16_t)40) / (uint16_t)100);
-    uint16_t negativeNoiseThreshold = (uint16_t)(((uint16_t)count * (uint16_t)40) / (uint16_t)100);
-    uint16_t hysteresis = (uint16_t)(((uint16_t)count * (uint16_t)10) / (uint16_t)100);
-    uint16_t lowBaselineReset = 50;
-
-    // Write out the calibration values
-    if (!setBaseThreshold((uint8_t)fingerBaselineThreshold))
-        return false;
-    if (!setNoiseThreshold((uint8_t)noiseThreshold))
-        return false;
-    if (!setNegativeNoiseThreshold((uint8_t)negativeNoiseThreshold))
-        return false;
-    if (!setHysteresis((uint8_t)hysteresis))
-        return false;
-    if (!setLowBaselineReset((uint8_t)lowBaselineReset))
-        return false;
-
-    return true;
-}
-
 bool sfDevCY8CMBR3::setRefreshInterval(sfe_cy8cmbr3_refresh_interval_t interval)
 {
     // Ensure valid inputs
@@ -1133,10 +1059,6 @@ uint8_t sfDevCY8CMBR3::readCapacitancePF(sfe_cy8cmbr3_sensor_id_t sensorId)
     
     _last_data_pF = capacitancePF; // Store the last read data
     
-    // Serial.print("Debug Capacitance (pF) for Sensor ID Successful...");
-    // Serial.print(sensorId);
-    // Serial.print(": ");
-    // Serial.println(capacitancePF);
     return capacitancePF; // Return the capacitance value in pF
 }
 
@@ -1155,8 +1077,6 @@ uint16_t sfDevCY8CMBR3::readDifferenceCount(sfe_cy8cmbr3_sensor_id_t sensorId)
     sfe_cy8cmbr3_reg_diff_cnt_t diffCount = {0}; // Variable to hold the difference count
     if (!readWithSyncCounter(ksfCY8CMBR3RegDiffCnt0, diffCount.word))
         return 0; // Return 0 to indicate error.
-    
-    // TODO: Depending on endianness, may need to byte-swap here.
 
     return diffCount.word; // Return the difference count
 }
@@ -1429,15 +1349,6 @@ static const uint8_t kDefaultCY8CMBR3Config[][4] = {
     {ksfCY8CMBR3RegScratchpad1, 0x01, 0x00, 0x00}
 };
 
-bool sfDevCY8CMBR3::checkDefaultConfiguration(void)
-{
-    sfe_cy8cmbr3_reg_system_status_t systemStatus;
-    if (!_readWithRetry(ksfCY8CMBR3RegSystemStatus, systemStatus.byte))
-        return false;
-
-    return (systemStatus.F_DEFAULT == 1);
-}
-
 bool sfDevCY8CMBR3::saveDefaultConfig(void)
 {
     if (!_theBus)
@@ -1465,15 +1376,8 @@ bool sfDevCY8CMBR3::saveDefaultConfig(void)
         }
     }
 
-    // TODO: Maybe remove the below if it seems like it's not needed...
-    // Check the F_DEFAULT bit of the SYSTEM_STATUS reg to check if default config is loaded after reset...
-    
     if (!reset())
         return false;
-
-    // This doesn't appear to ever evaluate to true, so we won't use it...
-    // if (!checkDefaultConfiguration())
-    //     return false;
     
     return true;
 }

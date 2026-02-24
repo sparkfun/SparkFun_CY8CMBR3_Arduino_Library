@@ -1010,17 +1010,6 @@ class sfDevCY8CMBR3
     /// @return The current noise threshold value (0-127).
     uint8_t getNoiseThreshold(void);
 
-    /// @brief Set all the calibration parameters based on a count value.
-    /// @param count The count value to use for calibration (default is 128).
-    /// @return True if successful, false if it fails.
-    bool setCalibrationByCount(uint8_t count = 128);
-
-    void printOverrides(void);
-
-    /// @brief Check if the current configuration matches the default configuration.
-    /// @return True if the current configuration matches the default configuration, false otherwise.
-    bool checkDefaultConfiguration(void);
-
     /// @brief Load the default configuration and save it to non-volatile memory.
     /// @return True if successful, false if it fails.
     bool saveDefaultConfig(void);

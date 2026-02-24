@@ -3,9 +3,6 @@ TODO: Update with actual photo
 
 # SparkFun Capacitive Soil Moisture Sensor - CY8CMBR3 Arduino Library
 
-TODO: update links
-Arduino Library for the SparkFun Capacitive Soil Moisture Sensor
-
 ![License](https://img.shields.io/github/license/sparkfun/sparkfun_cy8cmbr3_arduino_library)
 ![Release](https://img.shields.io/github/v/release/sparkfun/SparkFun_CY8CMBR3_Arduino_Library)
 ![Release Date](https://img.shields.io/github/release-date/sparkfun/SparkFun_CY8CMBR3_Arduino_Library)
@@ -21,7 +18,7 @@ This library is intended for use with the following SparkFun Product - available
 | Product | Description|
 |--|--|
 TODO: update with actual description and link.
-|[SparkFun Capacitive Soil Moisture Sensor - CY8CMBR3102 (Qwiic)](https://www.sparkfun.com/products/23220) | SparkFun Qwiic Capacitive Soil Moisture Sensor enables users to sense soil moisture via a capacitive plate in the blade and the embedded CY8CMBR3102 capacitive touch sensor. It features a convenient ruler to allow precise soil moisture measurements. Unlike resistive soil moisture sensors, it does not have exposed metal leads which can suffer from rapid corrosion. If you were so inclined, you could even use this sensor as a touch or proximity sensor since touching the blade leads to a large increase in measured capacitance. 
+|[SparkFun Capacitive Soil Moisture Sensor - CY8CMBR3102 (Qwiic)](https://www.sparkfun.com/products/30480) | SparkFun Qwiic Capacitive Soil Moisture Sensor enables users to sense soil moisture via a capacitive plate in the blade and the embedded CY8CMBR3102 capacitive touch sensor. It features a convenient ruler to allow precise soil moisture measurements. Unlike resistive soil moisture sensors, it does not have exposed metal leads which can suffer from rapid corrosion. If you were so inclined, you could even use this sensor as a touch or proximity sensor since touching the measuruing plate leads to a large increase in measured capacitance. 
 
 ## Documentation
 TODO: Update links

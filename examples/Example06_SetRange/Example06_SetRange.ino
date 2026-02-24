@@ -96,14 +96,11 @@ void loop()
     Serial.println(rawCounts);
 
     // Read debug capacitance in pF
-    // 
     uint8_t capacitancePF = mySensor.readCapacitancePF();
     {
         Serial.print("Capacitance: ");
         Serial.print(capacitancePF);
         Serial.println(" pF");
-        // Serial.print("Hex: 0x");
-        // Serial.println(capacitancePF, HEX);
     }
     
     Serial.println();
