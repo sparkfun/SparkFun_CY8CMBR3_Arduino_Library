@@ -324,6 +324,8 @@ bool sfDevCY8CMBR3::reset(bool waitForCompletion){
     if (!sendCtrlCommand(CTRL_CMD_SW_RESET, waitForCompletion))
         return false;
 
+    ledOff(); // Ensure LED is off after reset
+
     return true; // Return true to indicate success
 }
 
@@ -441,10 +443,10 @@ bool sfDevCY8CMBR3::setSensorId(sfe_cy8cmbr3_sensor_id_t sensorId)
     sfe_cy8cmbr3_sensor_id_t debugSensorId = getDebugSensorId();
     while (debugSensorId != sensorId){
         // Wait until the sensor ID is updated
-        Serial.print("Waiting for debug sensor ID to update to ");
-        Serial.println((uint8_t)sensorId);
-        Serial.print("Current debug sensor ID: ");
-        Serial.println((uint8_t)debugSensorId);
+        // Serial.print("Waiting for debug sensor ID to update to ");
+        // Serial.println((uint8_t)sensorId);
+        // Serial.print("Current debug sensor ID: ");
+        // Serial.println((uint8_t)debugSensorId);
         debugSensorId = getDebugSensorId();
     }
 

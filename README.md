@@ -1,5 +1,5 @@
 TODO: Update with actual photo
-![SparkFun Capacitive Soil Moisture Sensor (CY8CMBR3102) Arduino Library](docs/images/AS7343_Arduino_Banner.png "SparkFun Capacitive Soil Moisture Sensor (CY8CMBR3102) Arduino Library]")
+![SparkFun Capacitive Soil Moisture Sensor (CY8CMBR3102) Arduino Library](docs/images/Qwiic_Soil_Moisture-ArduinoBanner.png "SparkFun Capacitive Soil Moisture Sensor (CY8CMBR3102) Arduino Library]")
 
 # SparkFun Capacitive Soil Moisture Sensor - CY8CMBR3 Arduino Library
 
@@ -12,7 +12,6 @@ Arduino Library for the SparkFun Capacitive Soil Moisture Sensor
 ![Documentation - build](https://img.shields.io/github/actions/workflow/status/sparkfun/SparkFun_CY8CMBR3_Arduino_Library/build-deploy-ghpages.yml?label=doc%20build)
 ![Compile - Test](https://img.shields.io/github/actions/workflow/status/sparkfun/SparkFun_CY8CMBR3_Arduino_Library/compile-sketch.yml?label=compile%20test)
 ![GitHub issues](https://img.shields.io/github/issues/sparkfun/SparkFun_CY8CMBR3_Arduino_Library)
-
 
 This library provides full access to the functions of the CY8CMBR3102 through an I2C connection using the SparkFun Qwiic connectors and cables. This allows for reading the raw capacitance measured by the SparkFun Capacitive Soil Moisture Sensor. Capacitance increases with soil moisture, so this can be used to measure how moist soil is. 
 
@@ -28,11 +27,11 @@ TODO: update with actual description and link.
 TODO: Update links
 |Reference | Description |
 |---|---|
-|[Library Documentation](https://docs.sparkfun.com/SparkFun_CY8CMBR3_Arduino_Library/)| The full documentation and API for this Arduino library|
+|[Library Documentation](https://docs.sparkfun.com/SparkFun_CY8CMBR3_Arduino_Library/classsf_dev_c_y8_c_m_b_r3.html)| The full documentation and API for this Arduino library|
 |[SparkFun Capacitive Soil Moisture Sensor - CY8CMBR3102 (Qwiic)](https://github.com/sparkfun/SparkFun_Spectral_Sensor_Breakout_AS7343_Qwiic/)| Hardware GitHub Repository|
-|[Hook Up Guide - Capacitive Soil Moisture Sensor - CY8CMBR3102 (Qwiic)](https://docs.sparkfun.com/SparkFun_Spectral_Sensor_Breakout_AS7343_Qwiic/) | Hardware Overview and Quick Start for the SparkFun Spectral Sensor - AS7343 (Qwiic)|
-|[CY8CMBR3102 Datasheet](https://cdn.sparkfun.com/assets/e/f/3/6/c/AS7343_DS001046_6-00.pdf) | Datasheet for the AS7343 IC|
-[CY8CMBR3102 Technical Reference Manual](https://docs.sparkfun.com/SparkFun_Spectral_Sensor_Breakout_AS7343_Qwiic/) | Hardware Overview and Quick Start for the SparkFun Spectral Sensor - AS7343 (Qwiic)|
+|[Hook Up Guide - Capacitive Soil Moisture Sensor - CY8CMBR3102 (Qwiic)](https://docs.sparkfun.com/SparkFun_Spectral_Sensor_Breakout_AS7343_Qwiic/) | Hardware Overview and Quick Start for the SparkFun  Capacitive Soil Moisture Sensor - CY8CMBR3102 (Qwiic)|
+|[CY8CMBR3102 Datasheet](https://www.infineon.com/assets/row/public/documents/30/49/infineon-cy8cmbr3002-cy8cmbr3102-cy8cmbr3106s-cy8cmbr3108-cy8cmbr3110-cy8cmbr3116-datasheet-en.pdf) | Datasheet for the CY8CMBR3102 IC|
+[CY8CMBR3102 Technical Reference Manual](https://www.infineon.com/assets/row/public/documents/30/57/infineon-cy8cmbr3xxx-capsense-express-controllers-registers-trm-additionaltechnicalinformation-en.pdf) | Hardware Overview and Quick Start for the SparkFun  Capacitive Soil Moisture Sensor - CY8CMBR3102 (Qwiic)|
 |[Installing an Arduino Library Guide](https://learn.sparkfun.com/tutorials/installing-an-arduino-library)| Basic information on how to install an Arduino library|
 
 ## Examples
@@ -46,7 +45,7 @@ The following examples are provided with the library
 |[LED](examples/Example_03_LED/Example_03_LED.ino)| Demonstrates how to toggle the LED and use it as an indicator for when soil moisture goes below a threshold |
 |[I2C Address Setting](examples/Example_04_I2CAddress/Example_04_I2CAddress.ino)| Shows how to set up a threshold and trigger an interrupt when the light reading crosses that threshold.|
 |[Multiple Sensors](examples/Example_05_MultipleSensors/Example_05_MultipleSensors.ino)| Demonstrates how to setup and use multiple sensors at once. It requires previously setting the I2C address of two sensors with Example 4 |
-|[Calibration](examples/Example_06_Calibration/Example_06_Calibration.ino)| Shows how to calibrate the sensor's raw count values to an appropriate range.
+|[Set Range](examples/Example_06_SetRange/Example_06_SetRange.ino)| Shows how to set the sensor's raw count values to an appropriate range.
 
 
 ## License Information

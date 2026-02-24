@@ -20,9 +20,11 @@
 */
 #include <SparkFun_CY8CMBR3.h>
 
-// We'll use four sensors on the same I2C bus with different addresses
-SfeCY8CMBR3ArdI2C mySensors[4];
-const uint8_t sensorAddresses[4] = {0x10, 0x20, 0x30, 0x40}; // Example I2C addresses for the sensors
+const uint8_t kNumSensors = 2;
+
+// We'll use two sensors on the same I2C bus with different addresses
+SfeCY8CMBR3ArdI2C mySensors[kNumSensors];
+const uint8_t sensorAddresses[kNumSensors] = {0x10, 0x20}; // Example I2C addresses for the sensors
 
 void setup()
 {
@@ -33,7 +35,7 @@ void setup()
     // Start the underlying Arduino I2C bus
     Wire.begin();
 
-    for (int i = 0 ; i < 4; i++)
+    for (int i = 0 ; i < kNumSensors; i++)
     {
         // Initialize each CY8CMBR3 sensor
         mySensors[i].begin(sensorAddresses[i]);
@@ -63,7 +65,7 @@ void loop()
 {   
     // Read capacitance in pF from each sensor 
     // Note we again need to set the I2C address for each before reading
-    for (int i = 0 ; i < 4; i++)
+    for (int i = 0 ; i < kNumSensors; i++)
     {   if (!mySensors[i].setI2CAddress(sensorAddresses[i]))
         {
             Serial.print("Failed to set I2C address for sensor ");

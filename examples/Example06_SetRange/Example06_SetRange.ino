@@ -1,7 +1,7 @@
 /*
   Using the CY8CMBR3 Sensor.
 
-  This example shows how to perform calibration of the CY8CMBR3102 moisture sensor 
+  This example shows how to set the range of the CY8CMBR3102 moisture sensor 
   to use the higher-resolution (but less objective/universal) rawCounts value 
   to measure the capacitance on the sensor.
 
@@ -30,7 +30,7 @@ void setup()
 
     delay(1000);
 
-    Serial.println("CY8CMBR3 Example 6 - Calibration");
+    Serial.println("CY8CMBR3 Example 6 - Set Raw Count Range");
     
     // Start the underlying Arduino I2C bus
     Wire.begin();
@@ -64,28 +64,28 @@ void loop()
     // the capacitance that it senses during power up/initialization. This allows it to maximize
     // resolution for the expected capacitance range. However, if the capacitance changes significantly
     // (for example, a moisture sensor going from dry to very wet), the raw count readings may saturate
-    // and get stuck at a maximum value. You can run reset() again to recalibrate the raw count range if needed.
+    // and get stuck at a maximum value. You can run reset() again to set the raw count range if needed.
     
     // Since we want to explore the entire range of readings up to the wettest soil possible,
     // we should prompt the user to ensure the sensor is in the wettest possible state
-    // and then run reset() again to recalibrate.
-    Serial.println("To recalibrate, ensure the moisture sensor in your target soil type with your target density and at the most watered state possible.");
-    Serial.println("Then press any key in the serial monitor to recalibrate the sensor's raw count range...");
-    Serial.println("This calibration will NOT last between power cycles...");
+    // and then run reset() again to set the raw count range.
+    Serial.println("To set the raw count range, ensure the moisture sensor in your target soil type with your target density and at the most watered state possible.");
+    Serial.println("Then press any key in the serial monitor to set the sensor's raw count range...");
+    Serial.println("This setting will NOT last between power cycles...");
 
-    // If user has sent us anything, recalibrate...
+    // If user has sent us anything, reset the sensor to set the raw count range...
     if (Serial.available()){
       Serial.println("User input received!");
       Serial.read(); // clear the input buffer
-      Serial.println("Recalibrating sensor...");
+      Serial.println("Setting sensor's raw count range...");
 
       if (!mySensor.reset()){
-          Serial.println("Failed to reset device for recalibration. Please check your wiring!");
+          Serial.println("Failed to reset device for setting raw count range. Please check your wiring!");
           Serial.println("Halting...");
           while (1); // Enter infinite loop if we reach this failure
       }
       else{
-        Serial.println("Recalibration successful!");
+        Serial.println("Raw count range set successfully!");
         mySensor.ledOff();
       }
     }
