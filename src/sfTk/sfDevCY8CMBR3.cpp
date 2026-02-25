@@ -57,8 +57,6 @@ uint16_t sfDevCY8CMBR3::getDeviceID(void)
     // Read the device ID register. If it errors, then return 0x00.
     if (!_readWithRetry(ksfCY8CMBR3RegDeviceId, devID.word))
         return 0x00; // Return 0x00 to indicate error.
-    
-    // TODO: Depending on endianness, may need to byte-swap here.
 
     return devID.word; // Return the device ID.
 }
@@ -1098,8 +1096,6 @@ uint16_t sfDevCY8CMBR3::readDebugDifferenceCount(sfe_cy8cmbr3_sensor_id_t sensor
     // Read the DEBUG_DIFFERENCE_COUNTx register to get the difference count
     if (!readWithSyncCounter(ksfCY8CMBR3RegDebugDiffCnt0, diffCount.word))
         return 0; // Return 0 to indicate error.
-    
-    // TODO: Depending on endianness, may need to byte-swap here.
 
     return diffCount.word; // Return the difference count
 }
@@ -1121,8 +1117,6 @@ uint16_t sfDevCY8CMBR3::readBaselineCount(sfe_cy8cmbr3_sensor_id_t sensorId)
     // Read the DEBUG_BASELINE_COUNT register to get the baseline count
     if (!readWithSyncCounter(ksfCY8CMBR3RegDebugBaseline0, baselineCount.word))
         return 0; // Return 0 to indicate error.
-    
-    // TODO: Depending on endianness, may need to byte-swap here.
 
     return baselineCount.word; // Return the baseline count
 }

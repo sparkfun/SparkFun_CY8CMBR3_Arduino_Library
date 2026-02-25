@@ -23,10 +23,10 @@
  * - sfDevCY8CMBR: Main class for interfacing with the CY8CMBR3 sensor.
  *
  * @section Repository Repository
- * https://github.com/sparkfun/SparkFun_CY8CMBR_Arduino_Library
+ * https://github.com/sparkfun/SparkFun_CY8CMBR3_Arduino_Library
  *
  * @section Product_Links Product Links
- * - Qwiic 1x1: https://www.sparkfun.com/products/TODO
+ * - Qwiic 1x1: https://www.sparkfun.com/products/30480
  *
  */
 
@@ -256,7 +256,6 @@ typedef union {
     uint8_t byte;
 } sfe_cy8cmbr3_reg_sensitivity0_t;
 
-// TODO: Should we even make bitfield definitions for regs that are simply a value setting that spans the whole register?
 // BASE_THRESHOLDx: Base threshold for button sensors 0 - 1
 typedef union {
     struct {

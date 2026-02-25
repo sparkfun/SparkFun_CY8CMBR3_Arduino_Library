@@ -15,7 +15,7 @@
   Serial.print it out at 115200 baud to serial monitor.
 
   Feel like supporting our work? Buy a board from SparkFun!
-  https://www.sparkfun.com/products/TODO
+  https://www.sparkfun.com/products/30480
 */
 #include <SparkFun_CY8CMBR3.h>
 

@@ -29,7 +29,7 @@
  * SPDX-License-Identifier: MIT
  *
  * @section Product_Links Product Links
- * - Qwiic 1x1: https://www.sparkfun.com/products/TODO
+ * - Qwiic 1x1: https://www.sparkfun.com/products/30480
  *
  * @see https://github.com/sparkfun/SparkFun_CY8CMBR3_Arduino_Library
 */
@@ -242,7 +242,7 @@ class SfeCY8CMBR3ArdI2C : public sfDevCY8CMBR3
      * @code
      * SfeCY8CMBR3ArdI2C sensor;
      * uint8_t busAddress, deviceAddress;
-     * if (sensor.getDeviceAddress(busAddress, deviceAddress)) {
+     * if (sensor.getI2CAddress(busAddress, deviceAddress)) {
      *    Serial.print("Bus Address: 0x");
      *    Serial.println(busAddress, HEX);
      *    Serial.print("Device Address: 0x");
