@@ -47,7 +47,6 @@ void setup()
     // CS_SENSITIVITY_250_COUNTS_PER_PF
     // CS_SENSITIVITY_167_COUNTS_PER_PF
     // CS_SENSITIVITY_125_COUNTS_PER_PF
-    mySensor.setSensitivity(CS_SENSITIVITY_500_COUNTS_PER_PF); 
     if (!mySensor.setSensitivity(CS_SENSITIVITY_500_COUNTS_PER_PF)){
       Serial.println("Failed to set sensitivity...");
       while(1){}
@@ -80,14 +79,13 @@ void loop()
     // Read debug capacitance in pF
     uint8_t capacitancePF = mySensor.readCapacitancePF();
 
-    Serial.print("\"Debug\" Capacitance: ");
-    Serial.print(capacitancePF);
+    Serial.print("Capacitance(PF): ");
+    Serial.println(capacitancePF);
 
     // Read raw count data 
     // The range of this is set up automatically by the "SmartSense" algorithm in the CY8CMBR3 
     // based on capacitance it senses at start up. So, for best results, ensure the sensor is in
     // the wettest condition you expect when you power on so it can set the range accordingly.
-    // For more details, see the set range example 
     uint16_t rawCounts = mySensor.readRawCount();
     Serial.print("Raw Counts: ");
     Serial.println(rawCounts);
@@ -107,6 +105,7 @@ void loop()
     // and differential counts to see small changes in capacitance. This would 
     // allow for higher resolution readings within a smaller range while still 
     // being able to detect larger changes by looking at the baseline.
+    // See the "SetRange" example for a more useful way to use raw counts.
 
     // Read base count data
     uint16_t baseCounts = mySensor.readBaselineCount();

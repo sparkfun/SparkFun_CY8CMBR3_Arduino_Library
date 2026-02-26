@@ -59,6 +59,8 @@ void loop()
     Serial.println(rawCounts);
     Serial.println();
 
+    // Note: If you want inverse logic (turn on LED when plant is OVER a threshold i.e. to measure overwatering)
+    // then swap the "<" sign below for the ">" sign
     if (capacitance < threshold)
     {
         mySensor.ledOn();

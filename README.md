@@ -1,4 +1,3 @@
-TODO: Update with actual photo
 ![SparkFun Capacitive Soil Moisture Sensor (CY8CMBR3102) Arduino Library](docs/images/Qwiic_Soil_Moisture-ArduinoBanner.png "SparkFun Capacitive Soil Moisture Sensor (CY8CMBR3102) Arduino Library]")
 
 # SparkFun Capacitive Soil Moisture Sensor - CY8CMBR3 Arduino Library

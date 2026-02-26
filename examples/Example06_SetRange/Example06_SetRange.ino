@@ -79,7 +79,9 @@ void loop()
       Serial.read(); // clear the input buffer
       Serial.println("Setting sensor's raw count range...");
 
-      if (!mySensor.reset()){
+      // Importantly our defaultMoistureSensorInit() function calls "reset()" which will essentially power cycle the device 
+      // triggering SmartSense to set the range again. 
+      if (!mySensor.defaultMoistureSensorInit()){
           Serial.println("Failed to reset device for setting raw count range. Please check your wiring!");
           Serial.println("Halting...");
           while (1); // Enter infinite loop if we reach this failure
