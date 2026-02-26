@@ -24,7 +24,7 @@ This library is intended for use with the following SparkFun Product - available
 |[SparkFun Capacitive Soil Moisture Sensor - CY8CMBR3102 (Qwiic)](https://github.com/sparkfun/SparkFun_Capacitive_Soil_Moisture_Sensor_CY8CMBR3102)| Hardware GitHub Repository|
 |[Hook Up Guide - Capacitive Soil Moisture Sensor - CY8CMBR3102 (Qwiic)](https://docs.sparkfun.com/SparkFun_Capacitive_Soil_Moisture_Sensor_CY8CMBR3102/introduction/) | Hardware Overview and Quick Start for the SparkFun  Capacitive Soil Moisture Sensor - CY8CMBR3102 (Qwiic)|
 |[CY8CMBR3102 Datasheet](https://www.infineon.com/assets/row/public/documents/30/49/infineon-cy8cmbr3002-cy8cmbr3102-cy8cmbr3106s-cy8cmbr3108-cy8cmbr3110-cy8cmbr3116-datasheet-en.pdf) | Datasheet for the CY8CMBR3102 IC|
-[CY8CMBR3102 Technical Reference Manual](https://www.infineon.com/assets/row/public/documents/30/57/infineon-cy8cmbr3xxx-capsense-express-controllers-registers-trm-additionaltechnicalinformation-en.pdf) | Hardware Overview and Quick Start for the SparkFun  Capacitive Soil Moisture Sensor - CY8CMBR3102 (Qwiic)|
+[CY8CMBR3102 Technical Reference Manual](https://www.infineon.com/assets/row/public/documents/30/57/infineon-cy8cmbr3xxx-capsense-express-controllers-registers-trm-additionaltechnicalinformation-en.pdf) | Reference manual for the CY8CMBR3102 Capsense® Express™ controller |
 |[Installing an Arduino Library Guide](https://learn.sparkfun.com/tutorials/installing-an-arduino-library)| Basic information on how to install an Arduino library|
 
 ## Examples
