@@ -6,7 +6,6 @@
 ![Release](https://img.shields.io/github/v/release/sparkfun/SparkFun_CY8CMBR3_Arduino_Library)
 ![Release Date](https://img.shields.io/github/release-date/sparkfun/SparkFun_CY8CMBR3_Arduino_Library)
 ![Documentation - build](https://img.shields.io/github/actions/workflow/status/sparkfun/SparkFun_CY8CMBR3_Arduino_Library/build-deploy-ghpages.yml?label=doc%20build)
-![Compile - Test](https://img.shields.io/github/actions/workflow/status/sparkfun/SparkFun_CY8CMBR3_Arduino_Library/compile-sketch.yml?label=compile%20test)
 ![GitHub issues](https://img.shields.io/github/issues/sparkfun/SparkFun_CY8CMBR3_Arduino_Library)
 
 This library provides full access to the functions of the CY8CMBR3102 through an I2C connection using the SparkFun Qwiic connectors and cables. This allows for reading the raw capacitance measured by the SparkFun Capacitive Soil Moisture Sensor. Capacitance increases with soil moisture, so this can be used to measure how moist soil is. 
@@ -16,8 +15,7 @@ This library is intended for use with the following SparkFun Product - available
 
 | Product | Description|
 |--|--|
-TODO: update with actual description and link.
-|[SparkFun Capacitive Soil Moisture Sensor - CY8CMBR3102 (Qwiic)](https://www.sparkfun.com/products/30480) | SparkFun Qwiic Capacitive Soil Moisture Sensor enables users to sense soil moisture via a capacitive plate in the blade and the embedded CY8CMBR3102 capacitive touch sensor. It features a convenient ruler to allow precise soil moisture measurements. Unlike resistive soil moisture sensors, it does not have exposed metal leads which can suffer from rapid corrosion. If you were so inclined, you could even use this sensor as a touch or proximity sensor since touching the measuruing plate leads to a large increase in measured capacitance. 
+|[SparkFun Capacitive Soil Moisture Sensor - CY8CMBR3102 (Qwiic)](https://www.sparkfun.com/sparkfun-qwiic-soil-moisture-sensor-capacitive.html) | SparkFun Qwiic Capacitive Soil Moisture Sensor enables users to sense soil moisture via a capacitive plate in the blade and the embedded CY8CMBR3102 capacitive touch sensor. It features a convenient ruler to allow precise soil moisture measurements. Unlike resistive soil moisture sensors, it does not have exposed metal leads which can suffer from rapid corrosion. If you were so inclined, you could even use this sensor as a touch or proximity sensor since touching the measuruing plate leads to a large increase in measured capacitance. 
 
 ## Documentation
 TODO: Update links

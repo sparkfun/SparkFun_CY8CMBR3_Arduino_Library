@@ -15,7 +15,7 @@
   Serial.print it out at 115200 baud to serial monitor.
 
   Feel like supporting our work? Buy a board from SparkFun!
-  https://www.sparkfun.com/products/30480
+  https://www.sparkfun.com/sparkfun-qwiic-soil-moisture-sensor-capacitive.html
 */
 #include <SparkFun_CY8CMBR3.h>
 
