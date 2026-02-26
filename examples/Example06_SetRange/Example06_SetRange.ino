@@ -69,6 +69,10 @@ void loop()
     // Since we want to explore the entire range of readings up to the wettest soil possible,
     // we should prompt the user to ensure the sensor is in the wettest possible state
     // and then run reset() again to set the raw count range.
+
+    // Be sure not to touch the capacitive plate (the ruler) on the sensor during range-setting or raw counts will get stuck (until a reboot)
+    // Simply place your sensor in soil in the wettest possible state you anticipate measuring.
+    // Then take your hand off the sensor and enter any key in the serial monitor.
     Serial.println("To set the raw count range, ensure the moisture sensor in your target soil type with your target density and at the most watered state possible.");
     Serial.println("Then press any key in the serial monitor to set the sensor's raw count range...");
     Serial.println("This setting will NOT last between power cycles...");
@@ -79,9 +83,9 @@ void loop()
       Serial.read(); // clear the input buffer
       Serial.println("Setting sensor's raw count range...");
 
-      // Importantly our defaultMoistureSensorInit() function calls "reset()" which will essentially power cycle the device 
+      // Importantly "reset()" will essentially power cycle the device 
       // triggering SmartSense to set the range again. 
-      if (!mySensor.defaultMoistureSensorInit()){
+      if (!mySensor.reset()){
           Serial.println("Failed to reset device for setting raw count range. Please check your wiring!");
           Serial.println("Halting...");
           while (1); // Enter infinite loop if we reach this failure

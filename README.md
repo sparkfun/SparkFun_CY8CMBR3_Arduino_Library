@@ -18,12 +18,11 @@ This library is intended for use with the following SparkFun Product - available
 |[SparkFun Capacitive Soil Moisture Sensor - CY8CMBR3102 (Qwiic)](https://www.sparkfun.com/sparkfun-qwiic-soil-moisture-sensor-capacitive.html) | SparkFun Qwiic Capacitive Soil Moisture Sensor enables users to sense soil moisture via a capacitive plate in the blade and the embedded CY8CMBR3102 capacitive touch sensor. It features a convenient ruler to allow precise soil moisture measurements. Unlike resistive soil moisture sensors, it does not have exposed metal leads which can suffer from rapid corrosion. If you were so inclined, you could even use this sensor as a touch or proximity sensor since touching the measuruing plate leads to a large increase in measured capacitance. 
 
 ## Documentation
-TODO: Update links
 |Reference | Description |
 |---|---|
 |[Library Documentation](https://docs.sparkfun.com/SparkFun_CY8CMBR3_Arduino_Library/classsf_dev_c_y8_c_m_b_r3.html)| The full documentation and API for this Arduino library|
-|[SparkFun Capacitive Soil Moisture Sensor - CY8CMBR3102 (Qwiic)](https://github.com/sparkfun/SparkFun_Spectral_Sensor_Breakout_AS7343_Qwiic/)| Hardware GitHub Repository|
-|[Hook Up Guide - Capacitive Soil Moisture Sensor - CY8CMBR3102 (Qwiic)](https://docs.sparkfun.com/SparkFun_Spectral_Sensor_Breakout_AS7343_Qwiic/) | Hardware Overview and Quick Start for the SparkFun  Capacitive Soil Moisture Sensor - CY8CMBR3102 (Qwiic)|
+|[SparkFun Capacitive Soil Moisture Sensor - CY8CMBR3102 (Qwiic)](https://github.com/sparkfun/SparkFun_Capacitive_Soil_Moisture_Sensor_CY8CMBR3102)| Hardware GitHub Repository|
+|[Hook Up Guide - Capacitive Soil Moisture Sensor - CY8CMBR3102 (Qwiic)](https://docs.sparkfun.com/SparkFun_Capacitive_Soil_Moisture_Sensor_CY8CMBR3102/introduction/) | Hardware Overview and Quick Start for the SparkFun  Capacitive Soil Moisture Sensor - CY8CMBR3102 (Qwiic)|
 |[CY8CMBR3102 Datasheet](https://www.infineon.com/assets/row/public/documents/30/49/infineon-cy8cmbr3002-cy8cmbr3102-cy8cmbr3106s-cy8cmbr3108-cy8cmbr3110-cy8cmbr3116-datasheet-en.pdf) | Datasheet for the CY8CMBR3102 IC|
 [CY8CMBR3102 Technical Reference Manual](https://www.infineon.com/assets/row/public/documents/30/57/infineon-cy8cmbr3xxx-capsense-express-controllers-registers-trm-additionaltechnicalinformation-en.pdf) | Hardware Overview and Quick Start for the SparkFun  Capacitive Soil Moisture Sensor - CY8CMBR3102 (Qwiic)|
 |[Installing an Arduino Library Guide](https://learn.sparkfun.com/tutorials/installing-an-arduino-library)| Basic information on how to install an Arduino library|
